@@ -1,0 +1,30 @@
+---
+- name: Install OpenJDK 8 using apt
+  apt:
+    name: openjdk-8-jdk
+    state: latest
+    install_recommends: no
+  become: true
+
+- name: Ensure the jenkins apt repository key is installed
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+    state: present
+  become: yes
+
+- name: Ensure the repository is added to apt source
+  apt_repository:
+    repo: deb https://pkg.jenkins.io/debian-stable binary/
+    state: present
+  become: yes
+
+- name: Ensure Jenkins is installed
+  apt:
+    name: jenkins
+    update_cache: yes
+  become: yes
+
+- name: Ensure Jenkins service is running
+  service:
+    name: jenkins
+    state: started
