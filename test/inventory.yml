@@ -1,0 +1,10 @@
+---
+- local:
+    - criteria_path: test/local.yml
+- ssh:
+  - target: vagrant@192.168.33.10
+    private_key: ~/.bakerx/insecure_private_key
+    criteria_path: test/ansible.yml
+  - target: vagrant@192.168.33.80
+    private_key: ~/.bakerx/insecure_private_key
+    criteria_path: test/mattermost.yml

@@ -1,0 +1,6 @@
+- group:
+    description: "Basic checks for localhost"
+    checks:
+      - version:
+         cmd: opunit --version
+         range: ^0.7.5

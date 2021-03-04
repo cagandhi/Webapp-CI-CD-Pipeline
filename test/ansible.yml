@@ -1,0 +1,22 @@
+- group:
+    description: "Basic checks for ansible server"
+    checks:
+      - version:
+         cmd: ansible --version
+         range: ^2.9.x
+      - reachable:
+          - /bakerx
+          - /bakerx/cm/inventory.ini
+      - contains: 
+          comment: Checking if you have MSDOS style newlines in your bash scripts. Fix with dos2unix
+          string: "\r"
+          expect: false
+          file: /bakerx/cm/run-ansible.sh
+      - contains: 
+          string: "\r"
+          expect: false
+          file: /bakerx/cm/server-init.sh
+      - reachable:
+        - path: .ssh/mm_rsa
+          permission: 700
+    

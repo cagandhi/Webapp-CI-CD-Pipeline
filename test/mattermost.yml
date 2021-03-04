@@ -1,0 +1,37 @@
+- group:
+    description: "Basic checks for dependencies"
+    checks:
+      - version:
+         cmd: mysql --version
+         range: ^5.7.x
+      - availability:
+          comment: From these 3 availability checks, only one of them has to pass...
+          port: 8065 || 80 || 443
+          status: 200
+          url: /
+      - reachable:
+         - path: /opt/mattermost
+           permission: w
+           group: mattermost
+         - path: /lib/systemd/system/mattermost.service
+           permission: r
+           group: root
+         - path: /opt/mattermost/config/config.json
+           permission: w
+           group: mattermost
+      - service:
+         name: mattermost.service
+         status: active
+      - service:
+         name: mysql
+         status: active
+      - contains:
+         file: /opt/mattermost/config/config.json
+         string: '"DriverName": "mysql"'
+      - contains: 
+          file: /opt/mattermost/config/config.json
+          query: .SqlSettings.DriverName
+          string: mysql
+          expect: true
+      - valid:
+         - json: /opt/mattermost/config/config.json

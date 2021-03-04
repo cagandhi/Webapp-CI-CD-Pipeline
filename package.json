@@ -1,0 +1,14 @@
+{
+  "name": "cm",
+  "version": "1.0.0",
+  "description": "Template for your hw2.",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {},
+  "author": "YOU",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "yargs": "^15.4.1"
+  }
+}
