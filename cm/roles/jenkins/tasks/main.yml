@@ -6,32 +6,33 @@
     install_recommends: no
   become: true
 
-- name: Ensure the jenkins apt repository key is installed
+- name: Install jenkins apt repository key
   apt_key:
     url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
     state: present
   become: yes
 
-- name: Ensure the repository is added to apt source
+- name: Add jenkins repo is added to apt source
   apt_repository:
     repo: deb https://pkg.jenkins.io/debian-stable binary/
     state: present
   become: yes
 
-- name: Ensure Jenkins is installed
+- name: Install jenkins via apt
   apt:
     name: jenkins
     update_cache: yes
   become: yes
 
-- name: Ensure Jenkins runs on port 9000
+- name: Change default port number in /etc/default/jenkins
   ansible.builtin.lineinfile:
     path: /etc/default/jenkins
     regexp: '^HTTP_PORT='
     line: HTTP_PORT=9000
   become: yes
 
-- name: Ensure Jenkins service is running
+- name: Ensure Jenkins service is restarted
   service:
     name: jenkins
-    state: started
+    state: restarted
+  become: yes
