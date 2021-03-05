@@ -24,6 +24,13 @@
     update_cache: yes
   become: yes
 
+- name: Ensure Jenkins runs on port 9000
+  ansible.builtin.lineinfile:
+    path: /etc/default/jenkins
+    regexp: '^HTTP_PORT='
+    line: HTTP_PORT=9000
+  become: yes
+
 - name: Ensure Jenkins service is running
   service:
     name: jenkins
