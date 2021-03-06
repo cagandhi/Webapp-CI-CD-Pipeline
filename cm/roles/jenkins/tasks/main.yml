@@ -53,10 +53,25 @@
     dest: "/var/lib/jenkins/init.groovy.d/basic-security.groovy"
     mode: 0755
   become: yes
-
-- name: Restarting Jenkins
+  
+- name: Ensure Jenkins service is restarted
   service:
     name: jenkins
     state: restarted
+  become: yes
 
+    
 
+- name: Install build-pipeline-plugin.
+  jenkins_plugin:
+    name: build-pipeline-plugin
+    state: latest
+    url: http://192.168.33.20:9000
+    url_username: admin
+    url_password: admin
+    timeout: 30
+  register: install
+  until: install is not failed
+  retries: 5
+  delay: 5
+    
