@@ -1,3 +1,6 @@
+# ignore ansible vault pass file
+.vault-pass
+
 *.retry
 
 # Logs

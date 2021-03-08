@@ -4,4 +4,6 @@
 
 - hosts: localhost
   roles:
-    - jenkins
+    - install-jenkins
+    - config-jenkins
+
