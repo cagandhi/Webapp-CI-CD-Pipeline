@@ -8,7 +8,7 @@
     MONGO_PASSWORD: "pass"
     DATABASE_NAME: "db"
   roles:
-    - install-jenkins
-    - config-jenkins
+    # - install-jenkins
+    # - config-jenkins
     - config-build
 
