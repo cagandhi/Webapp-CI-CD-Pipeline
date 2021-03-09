@@ -1,12 +1,4 @@
 ---
-
-# - name: Import the public key used by the package management system
-#   apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=7F0CEB10 state=present
-
-# - name: Add MongoDB repository
-#   apt_repository: repo='deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' state=present
-
-
 - name: install mongodb
   apt:
     name: mongodb
@@ -30,10 +22,10 @@
 
 - name: Create mongo user with password and readWrite role
   mongodb_user:
-    database: "{{DATABASE_NAME}}"
-    name: "{{MONGO_USER}}"
-    password: "{{MONGO_PASSWORD}}"
-    roles: readWrite
+    database: admin
+    name: admin
+    password: admin
+    roles: readWrite,dbAdmin,userAdmin
     state: present
   become: true
 
@@ -41,19 +33,19 @@
   apt_key:
     url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
     state: present
-  become: yes
+  become: true
 
 - name: "Add nodejs 14.x ppa for apt repo"
   apt_repository:
-    repo: deb https://deb.nodesource.com/node_14.x bionic main
-    # repo: "deb https://deb.nodesource.com/node_8.x xenial main"
+    repo: deb https://deb.nodesource.com/node_14.x focal main
     update_cache: yes
     state: present
-  become: yes
+  become: true
 
 - name: "Install nodejs"
   apt:
     update_cache: yes
     name: nodejs
-    state: present
-  become: yes
+    state: latest
+    install_recommends: yes
+  become: true

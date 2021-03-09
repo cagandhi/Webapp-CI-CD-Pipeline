@@ -41,11 +41,12 @@
     timeout: 5
   register: jenkins_service_status
   # Keep trying for 5 mins in 5 sec intervals
-  retries: 60
+  retries: 20
   delay: 5
   until: >
      'status' in jenkins_service_status and
      jenkins_service_status['status'] == 200
+  become: true
 
 - name: Install build-pipeline-plugin
   jenkins_plugin:
