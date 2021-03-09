@@ -34,6 +34,19 @@
     state: restarted
   become: yes
 
+- name: Wait for Jenkins to start up
+  uri:
+    url: http://localhost:9000
+    status_code: 200
+    timeout: 5
+  register: jenkins_service_status
+  # Keep trying for 5 mins in 5 sec intervals
+  retries: 60
+  delay: 5
+  until: >
+     'status' in jenkins_service_status and
+     jenkins_service_status['status'] == 200
+
 - name: Install build-pipeline-plugin
   jenkins_plugin:
     name: build-pipeline-plugin
@@ -41,11 +54,10 @@
     url: http://localhost:9000
     url_username: admin
     url_password: admin
-    timeout: 30
   register: install
   until: install is not failed
   retries: 10
-  delay: 2
+  delay: 5
 
 - name: Ensure Jenkins service is restarted after installing plugins
   service:
