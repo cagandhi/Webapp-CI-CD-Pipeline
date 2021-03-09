@@ -26,13 +26,14 @@
   pip:
     name: pymongo
     state: latest
+  become: true
 
 - name: Create mongo user with password and readWrite role
   mongodb_user:
     database: "{{DATABASE_NAME}}"
     name: "{{MONGO_USER}}"
     password: "{{MONGO_PASSWORD}}"
-    roles: "admin"
+    roles: readWrite
     state: present
   become: true
 

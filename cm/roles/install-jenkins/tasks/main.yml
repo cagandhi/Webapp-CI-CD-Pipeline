@@ -1,5 +1,5 @@
 ---
-- name: Install OpenJDK 8 using apt
+- name: Install OpenJDK 11 using apt
   apt:
     name: default-jdk
     state: latest
