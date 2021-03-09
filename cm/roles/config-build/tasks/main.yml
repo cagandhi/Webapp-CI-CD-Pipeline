@@ -1,0 +1,43 @@
+---
+- name: Add mongo ppa key
+  apt_key: >
+    keyserver=hkp://keyserver.ubuntu.com:80
+    id=7F0CEB10
+    state=present
+  become: true
+  
+- name: Add mongo sources list
+  lineinfile: >
+    line="deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse"
+    dest=/etc/apt/sources.list.d/mongodb.list
+    state=present
+    create=yes
+  become: true
+
+- name: Install mongo
+  apt: name=mongodb-org state=latest update_cache=yes
+  become: true
+
+- name: Create MongoDB root user siteRootAdmin
+  mongodb_user:
+    database: "{{db}}"
+    name: "{{MONGO_USER}}"
+    password: "{{MONGO_PASSWORD}}"
+    roles: readWrite
+    state: present
+
+- name: "Add nodejs apt key"
+  apt_key:
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    state: present
+
+- name: "Add nodejs 13.x ppa for apt repo"
+  apt_repository:
+    repo: deb https://deb.nodesource.com/node_13.x bionic main
+    update_cache: yes
+    
+- name: "Install nodejs"
+  apt:
+    update_cache: yes
+    name: nodejs
+    state: present
