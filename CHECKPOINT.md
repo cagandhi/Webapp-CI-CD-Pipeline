@@ -3,8 +3,8 @@
 ## Table of Contents
 
 * [Current Progress](#current-progress)
-    - [Step 1: Automatically configure a jenkins server](#step-1---automatically-configure-a-jenkins-server)
-    - [Step 2: Automatically configure a build environment for checkbox.io](#step-2---automatically-configure-a-build-environment-for-checkboxio)
+    - [Step 1 - Automatically configure a jenkins server](#step-1---automatically-configure-a-jenkins-server)
+    - [Step 2 - Automatically configure a build environment for checkbox.io](#step-2---automatically-configure-a-build-environment-for-checkboxio)
     + [Github Project Board](#github-project-board)
     + [Execution of pipeline setup command](#execution-of-pipeline-setup-command)
 * [Work to be done](#work-to-be-done)
