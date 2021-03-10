@@ -1,4 +1,10 @@
 ---
+- name: Add environment variables for node app and mongodb to bashrc
+  lineinfile:
+    path: "~/.bashrc"
+    line: "{{item}}"
+  loop: "{{ lookup('file', '../.env_vars.txt').splitlines() }}"
+
 - name: install mongodb
   apt:
     name: mongodb
@@ -13,7 +19,6 @@
     update_cache: yes
   become: true
 
-
 - name: "Install pymongo"
   pip:
     name: pymongo
@@ -25,7 +30,7 @@
     database: admin
     name: admin
     password: admin
-    roles: readWrite,dbAdmin,userAdmin
+    roles: readWrite
     state: present
   become: true
 
