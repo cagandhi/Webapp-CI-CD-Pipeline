@@ -1,5 +1,8 @@
 # ignore ansible vault pass file
 .vault-pass
+
+cm/temp_playbook.yml
+
 # General
 .DS_Store
 .AppleDouble

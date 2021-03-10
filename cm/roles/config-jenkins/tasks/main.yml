@@ -10,16 +10,16 @@
   file:
     path: "/var/lib/jenkins/init.groovy.d"
     state: directory
-    mode: 0755
+    mode: 0777
   register: groovy_dir
   become: yes
 
 - name: Copy Groovy script for admin (default user) creation
   template:
     force: yes
-    src: "/bakerx/cm/roles/config-jenkins/templates/jenkins-user.groovy.j2"
+    src: "/bakerx/cm/roles/config-jenkins/templates/basic-security.groovy"
     dest: "/var/lib/jenkins/init.groovy.d/basic-security.groovy"
-    mode: 0755
+    mode: 0777
   become: yes
 
 - name: Copy .vault-pass from current directory to the VM home directory
@@ -32,6 +32,7 @@
   service:
     name: jenkins
     state: restarted
+    enabled: yes
   become: yes
 
 - name: Wait for Jenkins to start up

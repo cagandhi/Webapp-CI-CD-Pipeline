@@ -3,10 +3,6 @@
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html
 
 - hosts: localhost
-  vars:
-    MONGO_USER: "user"
-    MONGO_PASSWORD: "pass"
-    DATABASE_NAME: "db"
   roles:
     - install-jenkins
     - config-jenkins
