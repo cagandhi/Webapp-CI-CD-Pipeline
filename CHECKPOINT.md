@@ -45,4 +45,11 @@
 * Create a pipeline build job in `Jenkins` server via code and run this job.
 * Document experiences and issues faced in the report and record screencast for the milestone.
 
+## Team contributions
 
+The unity ID of the member shown was responsible for the majority of the respective task.
+* Extending the CM template, installing `Jenkins` server and configuring `Ansible Vault` - `cagandhi`
+* Configuring the `Jenkins` server - `dshah3`
+* Configuring the build environment for `checkbox.io` - `rkshriva`
+
+All team members were equally invested in solving the bugs as well as testing the configuration changes in the server upon execution of the Ansible scripts.
