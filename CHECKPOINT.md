@@ -34,11 +34,14 @@
 
 ### Github Project Board
 
---- INSERT GITHUB PROJECT BOARD IMAGE HERE ---
+![pipe 1](imgs/project_board.png)
 
 ### Execution of pipeline setup command
 
---- INSERT PIPELINE SETUP EXECUTION IMAGES SHARED AS GOOGLE PHOTOS ALBUM ---
+![pipe 1](imgs/pipe1.png)
+![pipe 2](imgs/pipe2.png)
+![pipe 3](imgs/pipe3.png)
+
 
 ## Work to be done
 
