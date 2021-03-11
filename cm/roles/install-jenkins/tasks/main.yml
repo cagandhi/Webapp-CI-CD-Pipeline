@@ -1,9 +1,8 @@
 ---
 - name: Install OpenJDK 11 using apt
   apt:
-    name: default-jdk
+    name: openjdk-11-jdk
     state: latest
-    install_recommends: no
   become: true
 
 - name: Install jenkins apt repository key

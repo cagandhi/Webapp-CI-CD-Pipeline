@@ -1,9 +1,16 @@
 ---
+- name: Copy .vault-pass from current directory to the VM home directory
+  copy:
+    src: /bakerx/.vault-pass
+    dest: "~/"
+    mode: 0400
+
 - name: Add environment variables for node app and mongodb to bashrc
   lineinfile:
-    path: "~/.bashrc"
+    path: "/etc/environment"
     line: "{{item}}"
   loop: "{{ lookup('file', '../.env_vars.txt').splitlines() }}"
+  become: yes
 
 - name: install mongodb
   apt:
@@ -27,9 +34,9 @@
 
 - name: Create mongo user with password and readWrite role
   mongodb_user:
-    database: admin
-    name: admin
-    password: admin
+    database: "{{ lookup('env', 'MONGO_DB') }}"
+    name: "{{ lookup('env', 'MONGO_USER') }}"
+    password: "{{ lookup('env', 'MONGO_PASSWORD') }}"
     roles: readWrite
     state: present
   become: true

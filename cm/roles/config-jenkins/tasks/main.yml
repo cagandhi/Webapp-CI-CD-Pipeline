@@ -10,7 +10,7 @@
   file:
     path: "/var/lib/jenkins/init.groovy.d"
     state: directory
-    mode: 0777
+    # mode: 0777
   register: groovy_dir
   become: yes
 
@@ -19,14 +19,8 @@
     force: yes
     src: "/bakerx/cm/roles/config-jenkins/templates/basic-security.groovy"
     dest: "/var/lib/jenkins/init.groovy.d/basic-security.groovy"
-    mode: 0777
+    # mode: 0777
   become: yes
-
-- name: Copy .vault-pass from current directory to the VM home directory
-  copy:
-    src: /bakerx/.vault-pass
-    dest: "~/"
-    mode: 0400
 
 - name: Ensure Jenkins service is restarted
   service:
@@ -35,19 +29,10 @@
     enabled: yes
   become: yes
 
-- name: Wait for Jenkins to start up
-  uri:
-    url: http://localhost:9000
-    status_code: 200
-    timeout: 5
-  register: jenkins_service_status
-  # Keep trying for 5 mins in 5 sec intervals
-  retries: 20
-  delay: 5
-  until: >
-     'status' in jenkins_service_status and
-     jenkins_service_status['status'] == 200
-  become: true
+- name: Wait for jenkins to start up
+  wait_for:
+    timeout: 180
+  delegate_to: localhost
 
 - name: Install build-pipeline-plugin
   jenkins_plugin:

@@ -12,10 +12,12 @@ function die {
     exit 1
 }
 
+
 # Check the number of arguments
-[ $# -ge 2 ] || die "usage: $0 <playbook> <inventory>"
+[ $# -ge 3 ] || die "usage: $0 <playbook> <inventory> <vault-password-file>"
 
 PLAYBOOK=$1
 INVENTORY=$2
+VAULTPWD=$3
 
-ansible-playbook --vault-password-file /bakerx/.vault-pass $PLAYBOOK -i $INVENTORY
+ansible-playbook --vault-password-file $VAULTPWD $PLAYBOOK -i $INVENTORY
