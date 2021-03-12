@@ -34,7 +34,7 @@
     timeout: 180
   delegate_to: localhost
 
-- name: Install build-pipeline-plugin
+- name: Install build-pipeline-plugin in Jenkins server
   jenkins_plugin:
     name: build-pipeline-plugin
     state: latest

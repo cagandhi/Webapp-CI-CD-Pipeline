@@ -5,21 +5,36 @@
     dest: "~/"
     mode: 0400
 
-- name: Add environment variables for node app and mongodb to bashrc
+- name: Add environment variables for node app and mongodb to /etc/environment
   lineinfile:
     path: "/etc/environment"
-    line: "{{item}}"
-  loop: "{{ lookup('file', '../.env_vars.txt').splitlines() }}"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', './vars/vars.yml').splitlines() }}"
   become: yes
 
-- name: install mongodb
+- name: Source environment variables
+  shell: . /etc/environment
+
+- name: Install mongodb
   apt:
     name: mongodb
     state: latest
     update_cache: yes
   become: true
 
-- name: install pip
+# - name: Disable localhost login exception in mongodb
+#   lineinfile:
+#     path: /etc/mongodb.conf
+#     line: setParameter = enableLocalhostAuthBypass=0
+#   become: yes
+
+# - name: Restart mongodb service
+#   service:
+#     name: mongodb
+#     state: restarted
+#   become: yes
+
+- name: Install pip
   apt:
     name: python3-pip
     state: latest
@@ -34,9 +49,9 @@
 
 - name: Create mongo user with password and readWrite role
   mongodb_user:
-    database: "{{ lookup('env', 'MONGO_DB') }}"
-    name: "{{ lookup('env', 'MONGO_USER') }}"
-    password: "{{ lookup('env', 'MONGO_PASSWORD') }}"
+    database: "{{ MONGO_DB }}"
+    name: "{{ MONGO_USER }}"
+    password: "{{ MONGO_PASSWORD }}"
     roles: readWrite
     state: present
   become: true

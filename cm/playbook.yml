@@ -3,8 +3,10 @@
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html
 
 - hosts: localhost
+  gather_facts: no
+  vars_files:
+    - ./vars/vars.yml
   roles:
     - install-jenkins
     - config-jenkins
     - config-build
-
