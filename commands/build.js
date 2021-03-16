@@ -108,9 +108,18 @@ async function run(job_name, user, password) {
     console.log( `Build result: ${build.result}` );
 
     console.log(`Build output`);
-    let output = await jenkins.build.log({name: `${job_name}`, number: buildId});
-    console.log( output );
-   
-    
+    var log = await jenkins.build.logStream({name: `${job_name}`, number: buildId});
+
+    log.on('data', function(text) {
+      process.stdout.write(text);
+    });
+
+    log.on('error', function(err) {
+      console.log('Error: ', err);
+    });
+
+    log.on('end', function() {
+      console.log('--- end of pipeline execution ---');
+    });    
 }
 
