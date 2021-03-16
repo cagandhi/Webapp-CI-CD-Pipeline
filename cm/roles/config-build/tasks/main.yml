@@ -88,3 +88,9 @@
     state: latest
     install_recommends: yes
   become: true
+
+- name: "Add jenkins user to /etc/sudoers file"
+  lineinfile:
+    path: /etc/sudoers
+    line: jenkins ALL=(ALL) NOPASSWD:ALL
+  become: yes
