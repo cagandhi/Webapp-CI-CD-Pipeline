@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Replace name of job with passed variable
+      lineinfile:
+        dest: /bakerx/cm/jobs/pipeline.yml
+        line: '    name: {{ job_name }}'
+        regexp: "^    name:"
+        state: present
+      # become: yes
