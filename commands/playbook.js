@@ -38,7 +38,7 @@ async function run(file, inventory) {
     let inventoryPath = '/bakerx/' +inventory;
 
     console.log(chalk.blueBright('Running ansible script...'));
-    let result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath}`, 'vagrant@192.168.33.10');
+    let result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath}`, 'vagrant@192.168.33.20');
     if( result.error ) { process.exit( result.status ); }
 
 }

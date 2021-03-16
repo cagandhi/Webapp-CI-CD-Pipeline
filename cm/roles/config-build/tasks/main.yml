@@ -1,4 +1,10 @@
 ---
+- name: Copy jenkins_jobs.ini to /etc on the VM
+  copy:
+    src: /bakerx/cm/jobs/jenkins_jobs.ini
+    dest: /etc/
+  become: yes
+
 - name: Copy .vault-pass from current directory to the VM home directory
   copy:
     src: /bakerx/.vault-pass
@@ -44,6 +50,12 @@
 - name: "Install pymongo"
   pip:
     name: pymongo
+    state: latest
+  become: true
+
+- name: "Install jenkins-job-builder"
+  pip:
+    name: jenkins-job-builder
     state: latest
   become: true
 

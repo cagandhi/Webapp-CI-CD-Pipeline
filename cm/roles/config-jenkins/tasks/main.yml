@@ -10,7 +10,6 @@
   file:
     path: "/var/lib/jenkins/init.groovy.d"
     state: directory
-    # mode: 0777
   register: groovy_dir
   become: yes
 
@@ -19,7 +18,6 @@
     force: yes
     src: "/bakerx/cm/roles/config-jenkins/templates/basic-security.groovy"
     dest: "/var/lib/jenkins/init.groovy.d/basic-security.groovy"
-    # mode: 0777
   become: yes
 
 - name: Ensure Jenkins service is restarted
@@ -34,15 +32,51 @@
     timeout: 180
   delegate_to: localhost
 
-- name: Install build-pipeline-plugin in Jenkins server
+- name: Install jenkins-job-builder
   jenkins_plugin:
-    name: build-pipeline-plugin
+    name: jenkins-job-builder
     state: latest
     url: http://localhost:9000
     url_username: admin
     url_password: admin
-  register: install
-  until: install is not failed
+  register: install1
+  until: install1 is not failed
+  retries: 10
+  delay: 5
+
+- name: Install workflow-aggregator
+  jenkins_plugin:
+    name: workflow-aggregator
+    state: latest
+    url: http://localhost:9000
+    url_username: admin
+    url_password: admin
+  register: install2
+  until: install2 is not failed
+  retries: 10
+  delay: 5
+
+- name: Install ws-cleanup
+  jenkins_plugin:
+    name: ws-cleanup
+    state: latest
+    url: http://localhost:9000
+    url_username: admin
+    url_password: admin
+  register: install3
+  until: install3 is not failed
+  retries: 10
+  delay: 5
+
+- name: Install github
+  jenkins_plugin:
+    name: github
+    state: latest
+    url: http://localhost:9000
+    url_username: admin
+    url_password: admin
+  register: install4
+  until: install4 is not failed
   retries: 10
   delay: 5
 
