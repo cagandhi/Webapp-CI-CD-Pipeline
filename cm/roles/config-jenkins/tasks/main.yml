@@ -3,7 +3,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/jenkins
     regexp: '^HTTP_PORT='
-    line: HTTP_PORT=9000
+    line: HTTP_PORT={{ JENKINS_PORT }}
   become: yes
 
 - name: Create Directory For Jenkins(Groovy Script)
@@ -36,49 +36,53 @@
   jenkins_plugin:
     name: jenkins-job-builder
     state: latest
-    url: http://localhost:9000
-    url_username: admin
-    url_password: admin
+    url: "{{ JENKINS_URL }}"
+    url_username: "{{ JENKINS_USERNAME }}"
+    url_password: "{{ JENKINS_PASSWORD }}"
   register: install1
   until: install1 is not failed
   retries: 10
   delay: 5
+  become: yes
 
 - name: Install workflow-aggregator
   jenkins_plugin:
     name: workflow-aggregator
     state: latest
-    url: http://localhost:9000
-    url_username: admin
-    url_password: admin
+    url: "{{ JENKINS_URL }}"
+    url_username: "{{ JENKINS_USERNAME }}"
+    url_password: "{{ JENKINS_PASSWORD }}"
   register: install2
   until: install2 is not failed
   retries: 10
   delay: 5
+  become: yes
 
 - name: Install ws-cleanup
   jenkins_plugin:
     name: ws-cleanup
     state: latest
-    url: http://localhost:9000
-    url_username: admin
-    url_password: admin
+    url: "{{ JENKINS_URL }}"
+    url_username: "{{ JENKINS_USERNAME }}"
+    url_password: "{{ JENKINS_PASSWORD }}"
   register: install3
   until: install3 is not failed
   retries: 10
   delay: 5
+  become: yes
 
 - name: Install github
   jenkins_plugin:
     name: github
     state: latest
-    url: http://localhost:9000
-    url_username: admin
-    url_password: admin
+    url: "{{ JENKINS_URL }}"
+    url_username: "{{ JENKINS_USERNAME }}"
+    url_password: "{{ JENKINS_PASSWORD }}"
   register: install4
   until: install4 is not failed
   retries: 10
   delay: 5
+  become: yes
 
 - name: Ensure Jenkins service is restarted after installing plugins
   service:

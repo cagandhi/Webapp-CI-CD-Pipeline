@@ -1,5 +1,5 @@
 - job:
-    name: checkbox.io
+    name: pip
     project-type: pipeline
     dsl: |
         pipeline {
