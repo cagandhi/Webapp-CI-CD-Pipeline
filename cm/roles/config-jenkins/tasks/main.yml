@@ -40,6 +40,12 @@
     timeout: 180
   delegate_to: localhost
 
+- name: Delete grovvy script
+  file:
+    path: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+    state: absent
+  become: yes
+
 - name: Install jenkins plugins
   jenkins_plugin:
     name: "{{ item }}"
