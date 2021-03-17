@@ -13,6 +13,14 @@
   register: groovy_dir
   become: yes
 
+- name: Disable setup wizard
+  lineinfile:
+    dest: "/etc/default/jenkins"
+    state: present
+    regexp: "^JAVA_ARGS="
+    line: JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
+  become: yes
+
 - name: Copy Groovy script for admin (default user) creation
   template:
     force: yes
@@ -32,57 +40,16 @@
     timeout: 180
   delegate_to: localhost
 
-- name: Install jenkins-job-builder
+- name: Install jenkins plugins
   jenkins_plugin:
-    name: jenkins-job-builder
-    state: latest
-    url: "{{ JENKINS_URL }}"
+    name: "{{ item }}"
     url_username: "{{ JENKINS_USERNAME }}"
     url_password: "{{ JENKINS_PASSWORD }}"
-  register: install1
-  until: install1 is not failed
-  retries: 10
-  delay: 5
+    url: "{{ JENKINS_URL }}"
+    timeout: 60
+  with_items: [github, jenkins-job-builder, workflow-aggregator, ws-cleanup]
   become: yes
 
-- name: Install workflow-aggregator
-  jenkins_plugin:
-    name: workflow-aggregator
-    state: latest
-    url: "{{ JENKINS_URL }}"
-    url_username: "{{ JENKINS_USERNAME }}"
-    url_password: "{{ JENKINS_PASSWORD }}"
-  register: install2
-  until: install2 is not failed
-  retries: 10
-  delay: 5
-  become: yes
-
-- name: Install ws-cleanup
-  jenkins_plugin:
-    name: ws-cleanup
-    state: latest
-    url: "{{ JENKINS_URL }}"
-    url_username: "{{ JENKINS_USERNAME }}"
-    url_password: "{{ JENKINS_PASSWORD }}"
-  register: install3
-  until: install3 is not failed
-  retries: 10
-  delay: 5
-  become: yes
-
-- name: Install github
-  jenkins_plugin:
-    name: github
-    state: latest
-    url: "{{ JENKINS_URL }}"
-    url_username: "{{ JENKINS_USERNAME }}"
-    url_password: "{{ JENKINS_PASSWORD }}"
-  register: install4
-  until: install4 is not failed
-  retries: 10
-  delay: 5
-  become: yes
 
 - name: Ensure Jenkins service is restarted after installing plugins
   service:
