@@ -37,8 +37,12 @@
 
 - name: Wait for jenkins to start up
   wait_for:
-    timeout: 180
+    timeout: 5
   delegate_to: localhost
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 5
 
 - name: Delete grovvy script
   file:

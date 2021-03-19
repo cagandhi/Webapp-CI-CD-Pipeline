@@ -18,9 +18,11 @@ This command creates a new VM with static IP `192.168.33.20` and mounts the pres
 
 > -u and -p are optional parameters which default to `admin` and `admin`.
 
-This command creates a new build job in Jenkins and triggers its build with the set pipeline flow which can be seen in [pipeline.yml](cm/jobs/pipeline.yml) file.
+This command creates a new build job in Jenkins and triggers its build with the pipeline flow which can be seen in [pipeline.yml](cm/jobs/pipeline.yml) file.
 
 ### Experiences
+
+* Setting up the system requires knowledge on where certain system files are. For example, we needed to know the that the jenkins configuration file is in location `/etc/default/jenkins` so that the default port to run Jenkins server can be changed. Another example is the enabling of passwordless execution of `sudo` commands by the `jenkins` user. We had to google search and find that we needed to add the privilege for `jenkins` user in `/etc/sudoers` file.
 
 ### Screencast
 
