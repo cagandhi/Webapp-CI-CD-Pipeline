@@ -38,6 +38,10 @@ This command creates a new build job in Jenkins and triggers its build with the 
 
 * While executing the build for the pipeline job, we were not able to pass the 2nd test in the `npm test` command. The error that was shown was that of `MongoServerSelectionError` which meant that Mongo port or credentials wasn't able to be accessed. So, we cloned the `checkbox.io` repo in another directory and added some console.log statements in file db.js where mongo config parameters were fetched from the environment. This repo was then used in the Jenkinsfile rather than the git clone step and looking at the log of then created build made us understand that the variables weren't available to the Jenkinsfile. We then executed the npm test in a sudo shell which invoked the reloading of bash env variables and the tests passed successfully.
 
-### [Screencast](https://drive.google.com/file/d/1xwBZiidtGe9h5zQlba_sayZ04pyDNcTl/view?usp=sharing)
+* Another issue occurred frequently when we made a clean `git clone` of our repo and would execute the pipeline setup command without ever creating the `.vault-pass` file. When the ansible task to copy the `vault-pass` file to the VM home directory would fail, we would realise that `vault-pass` would have to be created since it wasn't checked into Git. This happened sometimes and we made sure to check the contents of the directory so we would remember to create the `vault-pass` file before running `pipeline setup`.
+
+* All the configuration parameters were stored in an encrypted variables yml file. To unencrypt that file and use those variables value in playbook, we had to pass the password file to the `ansible-playbook` command. Since we executed the run-ansible.sh file for the playbook, a third argument was passed to this shell file and processed and passed to the `ansible-playbook` command. When I made the change, when I would remotely trigger the `run-ansible.sh` via pipeline setup, I was not able to run it as the 3rd argument was never fetched. When I restarted the VM and my own machine and ran the same commands again, it started working and has been working ever since then. Sometimes, a simple restart can solve a bug.
+
+### [Screencast] (https://drive.google.com/file/d/1xwBZiidtGe9h5zQlba_sayZ04pyDNcTl/view?usp=sharing)
 
 ### [Checkpoint Progress Report ](CHECKPOINT.md)
