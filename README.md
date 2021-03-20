@@ -2,6 +2,16 @@
 
 ## Milestone 1
 
+### Table of Contents
++ [Project Setup](#project-setup)
++ [Project Implementation](#project-implementation)
+  - [Configure Jenkins and build environment](#configure-jenkins-and-build-environment)
+  - [Trigger a build job](#trigger-a-build-job)
++ [Experiences and learnings about system setup](#experiences-and-learnings-about-system-setup)
++ [Issues Faced](#issues-faced)
++ [Screencast](#screencast)
++ [Checkpoint Progress Report](#checkpoint-progress-report)
+
 ### Project Setup
 1. Clone the project.
 2. Run: `npm intall`
@@ -42,6 +52,6 @@ This command creates a new build job in Jenkins and triggers its build with the 
 
 * All the configuration parameters were stored in an encrypted variables yml file. To unencrypt that file and use those variables value in playbook, we had to pass the password file to the `ansible-playbook` command. Since we executed the run-ansible.sh file for the playbook, a third argument was passed to this shell file and processed and passed to the `ansible-playbook` command. When I made the change, when I would remotely trigger the `run-ansible.sh` via pipeline setup, I was not able to run it as the 3rd argument was never fetched. When I restarted the VM and my own machine and ran the same commands again, it started working and has been working ever since then. Sometimes, a simple restart can solve a bug.
 
-### [Screencast] (https://drive.google.com/file/d/1xwBZiidtGe9h5zQlba_sayZ04pyDNcTl/view?usp=sharing)
+### [Screencast](https://drive.google.com/file/d/1xwBZiidtGe9h5zQlba_sayZ04pyDNcTl/view?usp=sharing)
 
 ### [Checkpoint Progress Report ](CHECKPOINT.md)
