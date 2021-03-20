@@ -36,6 +36,8 @@ This command creates a new build job in Jenkins and triggers its build with the 
 
 * When we changed the Jenkins port in the `/etc/default/jenkins` file, it didn't occur to us that we would have to restart the Jenkins server so that it would read the port change. We tried running the command again and again and were also able to see that the file was changed to reflect the new port. After some attempts, it dawned on us that the config file would be read when Jenkins would start and if we force jenkins to restart again, the config would be reloaded and the port change would be reflected.
 
+* While executing the build for the pipeline job, we were not able to pass the 2nd test in the `npm test` command. The error that was shown was that of `MongoServerSelectionError` which meant that Mongo port or credentials wasn't able to be accessed. So, we cloned the `checkbox.io` repo in another directory and added some console.log statements in file db.js where mongo config parameters were fetched from the environment. This repo was then used in the Jenkinsfile rather than the git clone step and looking at the log of then created build made us understand that the variables weren't available to the Jenkinsfile. We then executed the npm test in a sudo shell which invoked the reloading of bash env variables and the tests passed successfully.
+
 ### Screencast
 
 ### [Checkpoint Progress Report ](CHECKPOINT.md)
