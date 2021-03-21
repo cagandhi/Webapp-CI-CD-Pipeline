@@ -54,7 +54,7 @@ This command creates a new build job in Jenkins and triggers its build with the 
 
 ### Screencast
 
-Here's the link to the [screencast](https://drive.google.com/file/d/1xwBZiidtGe9h5zQlba_sayZ04pyDNcTl/view?usp=sharing).
+Here's the link to the [screencast](https://drive.google.com/file/d/1b5FMlp4u2Kgrx-OtumWcB4Sue4Su4q36/view?usp=sharing).
 
 ### Checkpoint Progress Report
 
