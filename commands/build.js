@@ -120,6 +120,6 @@ async function run(job_name, user, password) {
 
     log.on('end', function() {
       console.log('--- end of pipeline execution ---');
-    });    
+    });
 }
 

@@ -1,0 +1,67 @@
+
+# install mysql
+# create mysql user if required
+# install java (already installed)
+# install spring
+# install maven
+# install tomcat/jetty
+# set up admin user on iTrust2
+# install cucumber/coffeemaker - already in itrust pom.xml
+
+# https://stackoverflow.com/a/26598887 - for mysql installation playbook
+---
+# - name: Install OpenJDK 11 using apt
+#   apt:
+#     name: openjdk-11-jdk
+#     state: latest
+#   become: true
+
+- name: Install Maven
+  apt:
+    name: maven
+    state: latest
+    update_cache: yes
+  become: yes
+
+- name: Install MySQL and other dependencies
+  apt:
+    name: ['mysql-server', 'python3-mysqldb'] #, 'python3-pymysql', 'libmysqlclient-dev'
+    state: latest
+    update_cache: yes
+  become: yes
+
+- name: Set root user in MySQL if does not exist
+  mysql_user:
+    login_user: "{{ MYSQL_ROOT_USERNAME }}"
+    login_password: "{{ MYSQL_ROOT_PASSWORD }}"
+    name: "{{ MYSQL_ROOT_USERNAME }}"
+    password: "{{ MYSQL_ROOT_PASSWORD }}"
+    state: present
+    check_implicit_admin: true
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
+
+- name: Copy the root credentials as .my.cnf file
+  template:
+    src: ../templates/root.cnf.j2
+    dest: "{{ item }}"
+    mode: 0600
+  with_items:
+    - '/home/vagrant/.my.cnf'
+    - '/root/.my.cnf'
+  become: yes
+
+- name: Removes anonymous MySQL user account for localhost
+  mysql_user:
+    name: ''
+    host: localhost
+    state: absent
+  become: yes
+
+- name: Restart mysql service
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes
+    sleep: 5
+  become: yes

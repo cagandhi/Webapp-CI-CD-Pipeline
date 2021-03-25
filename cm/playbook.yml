@@ -6,7 +6,11 @@
   gather_facts: no
   vars_files:
     - ./vars/vars.yml
+    - ./vars/jenkins_vars.yml
+    - ./vars/mongo_vars.yml
+    - ./vars/mysql_vars.yml
   roles:
-    - install-jenkins
-    - config-jenkins
-    - config-build
+    # - install-jenkins
+    # - config-jenkins
+    # - config-build
+    - config-build-itrust
