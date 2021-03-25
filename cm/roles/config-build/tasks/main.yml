@@ -11,11 +11,32 @@
     dest: "~/"
     mode: 0400
 
-- name: Add environment variables for node app and mongodb to /etc/environment
+- name: Add app env variables to /etc/environment
   lineinfile:
     path: "/etc/environment"
     line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
   loop: "{{ lookup('file', './vars/vars.yml').splitlines() }}"
+  become: yes
+
+- name: Add jenkins env variables jenkins to /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', './vars/jenkins_vars.yml').splitlines() }}"
+  become: yes
+
+- name: Add mongo env variables to /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', './vars/mongo_vars.yml').splitlines() }}"
+  become: yes
+
+- name: Add mysql env variables to /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', './vars/mysql_vars.yml').splitlines() }}"
   become: yes
 
 - name: Source environment variables
