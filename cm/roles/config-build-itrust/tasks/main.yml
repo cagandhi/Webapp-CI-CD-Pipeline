@@ -1,21 +1,4 @@
-
-# install mysql
-# create mysql user if required
-# install java (already installed)
-# install spring
-# install maven
-# install tomcat/jetty
-# set up admin user on iTrust2
-# install cucumber/coffeemaker - already in itrust pom.xml
-
-# https://stackoverflow.com/a/26598887 - for mysql installation playbook
 ---
-# - name: Install OpenJDK 11 using apt
-#   apt:
-#     name: openjdk-11-jdk
-#     state: latest
-#   become: true
-
 - name: Install Maven
   apt:
     name: maven
@@ -25,7 +8,7 @@
 
 - name: Install MySQL and other dependencies
   apt:
-    name: ['mysql-server', 'python3-mysqldb'] #, 'python3-pymysql', 'libmysqlclient-dev'
+    name: ['mysql-server', 'python3-mysqldb']
     state: latest
     update_cache: yes
   become: yes
