@@ -30,6 +30,16 @@
     update_cache: yes
   become: yes
 
+- name: Add mysql env variables to /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', '../vars/main.yml').splitlines() }}"
+  become: yes
+
+- name: Source environment variables
+  shell: . /etc/environment
+
 - name: Set root user in MySQL if does not exist
   mysql_user:
     login_user: "{{ MYSQL_ROOT_USERNAME }}"
@@ -41,7 +51,7 @@
     login_unix_socket: /var/run/mysqld/mysqld.sock
   become: yes
 
-- name: Copy the root credentials as .my.cnf file
+- name: Copy the root credentials as .my.cnf file in user home and root dirs
   template:
     src: ../templates/root.cnf.j2
     dest: "{{ item }}"

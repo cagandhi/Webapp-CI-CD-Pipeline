@@ -22,3 +22,13 @@
     name: jenkins
     update_cache: yes
   become: yes
+
+- name: Add app env variables to /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', '../vars/main.yml').splitlines() }}"
+  become: yes
+
+- name: Source environment variables
+  shell: . /etc/environment
