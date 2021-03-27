@@ -1,0 +1,17 @@
+---
+- name: Copy jenkins credentials xml file to home directory of vagrant user
+  template:
+    src: ../templates/jenkins_credentials.xml.j2
+    dest: /home/vagrant/jenkins_credentials.xml
+    force: yes
+
+- name: Delete git credentials (if already created) in Jenkins
+  shell:
+    cmd: java -jar jenkins-cli.jar -auth {{ JENKINS_USERNAME }}:{{ JENKINS_PASSWORD }} -s http://localhost:9000 delete-credentials system::system::jenkins _ gitncsucred
+    chdir: /home/vagrant/
+  ignore_errors: True
+
+- name: Create git credentials in jenkins through xml file
+  shell:
+    cmd: cat jenkins_credentials.xml | java -jar jenkins-cli.jar -auth {{ JENKINS_USERNAME }}:{{ JENKINS_PASSWORD }} -s http://localhost:9000 create-credentials-by-xml "system::system::jenkins" "(global)"
+    chdir: /home/vagrant/

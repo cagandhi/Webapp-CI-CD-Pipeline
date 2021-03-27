@@ -2,6 +2,7 @@
 .vault-pass
 
 cm/temp_playbook.yml
+temp.xml
 
 # General
 .DS_Store

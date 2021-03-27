@@ -9,9 +9,4 @@
     - config-jenkins
     - config-build
     - config-build-itrust
-
-  # vars_files:
-  #   - ./vars/vars.yml
-  #   - ./vars/jenkins_vars.yml
-  #   - ./vars/mongo_vars.yml
-  #   - ./vars/mysql_vars.yml
+    - install-git-cred-jenkins
