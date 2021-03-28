@@ -2,15 +2,15 @@
 - name: Install Maven
   apt:
     name: maven
-    state: latest
+    state: present
     update_cache: yes
   become: yes
 
 - name: Install MySQL and other dependencies
   apt:
     name: ['mysql-server', 'python3-mysqldb']
-    state: latest
-    update_cache: yes
+    state: present
+    # update_cache: yes
   become: yes
 
 - name: Add mysql env variables to /etc/environment

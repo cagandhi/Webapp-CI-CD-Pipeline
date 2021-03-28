@@ -6,11 +6,6 @@
     line: HTTP_PORT={{ JENKINS_PORT }}
   become: yes
 
-- name: Download jenkins-cli.jar
-  get_url:
-    url: http://localhost:9000/jnlpJars/jenkins-cli.jar
-    dest: /home/vagrant/jenkins-cli.jar
-
 - name: Add jenkins env variables jenkins to /etc/environment
   lineinfile:
     path: "/etc/environment"
@@ -83,3 +78,13 @@
     name: jenkins
     state: restarted
   become: yes
+
+- name: Wait for jenkins to start up
+  wait_for:
+    timeout: 120
+  delegate_to: localhost
+
+- name: Download jenkins-cli.jar
+  get_url:
+    url: http://localhost:9000/jnlpJars/jenkins-cli.jar
+    dest: /home/vagrant/jenkins-cli.jar
