@@ -84,3 +84,49 @@
     state: restarted
     enabled: yes
   become: yes
+
+- name: Install gdebi-core and unzip packages apt
+  apt:
+    name: ['gdebi-core', 'unzip']
+    state: present
+  become: yes
+
+# - name: Install unzip apt package
+#   apt:
+#     name: unzip
+#     state: present
+#   become: yes
+
+# - name: Install google chrome
+#   apt:
+#     deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#   register: gchrome_result
+#   until: gchrome_result | succeeded
+#   retries: 5
+#   delay: 5
+#   become: yes
+
+- name: Download google chrome deb file
+  get_url:
+    url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    dest: /home/vagrant/
+  become: yes
+
+- name: Install google chrome
+  shell:
+    cmd: gdebi --n google-chrome-stable_current_amd64.deb
+    chdir: /home/vagrant/
+  become: yes
+
+- name: Download chromedriver zip file
+  get_url:
+    url: https://chromedriver.storage.googleapis.com/90.0.4430.24/chromedriver_linux64.zip
+    dest: /home/vagrant/
+  become: yes
+
+- name: Unarchive chromedriver zip file
+  unarchive:
+    src: /home/vagrant/chromedriver_linux64.zip
+    dest: /home/vagrant/
+    remote_src: yes
+  become: yes
