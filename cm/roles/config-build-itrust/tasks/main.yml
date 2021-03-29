@@ -6,6 +6,23 @@
     update_cache: yes
   become: yes
 
+# set mysql root user password while installation to avoid issues of login later on, https://stackoverflow.com/a/42307644/6543250
+- name: Specify MySQL root password before installing
+  debconf:
+    name: mysql-server
+    question: mysql-server/root_password
+    value: '{{MYSQL_ROOT_PASSWORD | quote}}'
+    vtype: password
+  become: yes
+
+- name: Confirm MySQL root password before installing
+  debconf:
+    name: mysql-server
+    question: mysql-server/root_password_again
+    value: '{{MYSQL_ROOT_PASSWORD | quote}}'
+    vtype: password
+  become: yes
+
 - name: Install MySQL and other dependencies
   apt:
     name: ['mysql-server', 'python3-mysqldb']
@@ -23,16 +40,26 @@
 - name: Source environment variables
   shell: . /etc/environment
 
-- name: Set root user in MySQL if does not exist
-  mysql_user:
-    login_user: "{{ MYSQL_ROOT_USERNAME }}"
-    login_password: "{{ MYSQL_ROOT_PASSWORD }}"
-    name: "{{ MYSQL_ROOT_USERNAME }}"
-    password: "{{ MYSQL_ROOT_PASSWORD }}"
-    state: present
-    check_implicit_admin: true
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-  become: yes
+# - name: Create new user iTrust with all privileges
+#   mysql_user:
+#     login_unix_socket: /var/run/mysqld/mysqld.sock
+#     name: iTrust
+#     password: "{{ MYSQL_ROOT_PASSWORD }}"
+#     priv: '*.*:ALL'
+#     state: present
+#   become: yes
+
+# - name: Set root user in MySQL if does not exist
+#   mysql_user:
+#     login_unix_socket: /var/run/mysqld/mysqld.sock
+#     # login_user: "{{ MYSQL_ROOT_USERNAME }}"
+#     # login_password: "{{ MYSQL_ROOT_PASSWORD }}"
+#     name: "{{ MYSQL_ROOT_USERNAME }}"
+#     password: "{{ MYSQL_ROOT_PASSWORD }}"
+#     priv: '*.*:ALL'
+#     state: present
+#     # check_implicit_admin: true
+#   become: yes
 
 - name: Copy the root credentials as .my.cnf file in user home and root dirs
   template:
@@ -51,10 +78,9 @@
     state: absent
   become: yes
 
-- name: Restart mysql service
+- name: Restart mysql service and enable start on boot
   service:
     name: mysql
     state: restarted
     enabled: yes
-    sleep: 5
   become: yes
