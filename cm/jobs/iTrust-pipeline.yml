@@ -1,0 +1,34 @@
+- job:
+    name: iTrust
+    project-type: pipeline
+    dsl: |
+        pipeline {
+            agent any
+
+            stages {
+                stage('Source') {
+                    steps {
+                        git(credentialsId: 'gitncsucred', url: 'https://github.ncsu.edu/engr-csc326-staff/iTrust2-v8/')
+                    }
+                }
+                stage('Pre-Build - Set application.yml file for iTrust2'){
+                    steps{
+                        sh "cd iTrust2-v8/iTrust2/src/main/resources/ && cp application.yml.template application.yml"
+                        sh '. /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" application.yml'
+                    }
+                }
+                stage('Build and Test - Run unit and integration tests') {
+                    steps {
+                        sh "mvn clean test integration-test checkstyle:checkstyle"
+                    }
+                }
+            }
+
+            post{
+                always{
+                    sh "sudo mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -P3306 -e \'DROP DATABASE IF EXISTS iTrust2_test\'"
+                    sh "pgrep chrome | sudo xargs kill -9"
+                    sh "sudo kill \$(lsof -t -i:9001)"
+                }
+            }
+        }
