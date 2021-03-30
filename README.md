@@ -1,4 +1,8 @@
 # DEVOPS-17 Project
+## Milestone 2
+
+Here's the link to the [CHECKPOINT-M2.md](CHECKPOINT-M2.md).
+
 
 ## Milestone 1
 
