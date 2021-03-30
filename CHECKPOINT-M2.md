@@ -1,5 +1,17 @@
 # Milestone 2 - Checkpoint
 
+## Table of Contents
+
+
+* [Current Progress](#current-progress)
+  + [Automatically configure a build environment and iTrust build job](#automatically-configure-a-build-environment-and-itrust-build-job)
+  + [Github Project Board](#github-project-board)
+  + [Execution of pipeline setup command](#execution-of-pipeline-setup-command)
+* [Work to be done](#work-to-be-done)
+* [Team contributions](#team-contributions)
+
+
+
 ## Current Progress
 
 ### Automatically configure a build environment and iTrust build job
@@ -21,3 +33,14 @@
 * Configure checkstyle and code coverage plugins in build job.
 * Implement fuzzing and test suite analysis.
 * Implement static analysis for checkbox.io.
+
+
+## Team contributions
+
+The unity ID of the member shown was responsible for the majority of the respective task.
+* Configure build environment for iTrust and add git credentials in Jenkins credential manager - `cagandhi`
+* Writing the build job and triggering it through pipeline build command - `dshah3`
+* Refactor code, execute unit and integration tests on VM and install chrome utilities for iTrust test run - `rkshriva`
+
+All team members were equally invested in bug solving and testing the configuration changes in the server on execution of ansible scripts.
+
