@@ -8,18 +8,18 @@
             stages {
                 stage('Source') {
                     steps {
-                        git(credentialsId: 'gitncsucred', url: 'https://github.ncsu.edu/engr-csc326-staff/iTrust2-v8/')
+                        git branch: 'main', url: 'https://github.ncsu.edu/engr-csc326-staff/iTrust2-v8.git', credentialsId: 'gitncsucred'
                     }
                 }
                 stage('Pre-Build - Set application.yml file for iTrust2'){
                     steps{
-                        sh "cd iTrust2-v8/iTrust2/src/main/resources/ && cp application.yml.template application.yml"
-                        sh '. /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" application.yml'
+                        sh "cp iTrust2/src/main/resources/application.yml.template iTrust2/src/main/resources/application.yml"
+                        sh '. /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" iTrust2/src/main/resources/application.yml'
                     }
                 }
                 stage('Build and Test - Run unit and integration tests') {
                     steps {
-                        sh "mvn clean test integration-test checkstyle:checkstyle"
+                        sh "cd iTrust2/ && sudo mvn clean test integration-test checkstyle:checkstyle"
                     }
                 }
             }
