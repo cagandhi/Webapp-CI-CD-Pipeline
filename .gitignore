@@ -3,6 +3,7 @@
 
 cm/temp_playbook.yml
 temp.xml
+temp.sh
 
 # General
 .DS_Store
