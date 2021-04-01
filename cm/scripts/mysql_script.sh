@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mysql -uUSERNAME -pPASSWORD -hHOSTNAME -P3306 <<EOF
+DROP DATABASE IF EXISTS iTrust2_test
+EOF
