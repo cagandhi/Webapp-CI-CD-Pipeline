@@ -26,9 +26,7 @@
 
             post{
                 always{
-                    sh "./bakerx/cm/scripts/mysql_script.sh"
-                    sh "pkill chrome"
-                    sh "sudo kill -9 \$(lsof -t -i:9001)"
+                    sh "bash /bakerx/cm/scripts/cleanup.sh"
                 }
             }
         }
