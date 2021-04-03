@@ -26,9 +26,7 @@
 
             post{
                 always{
-                    sh "sudo mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -P3306 -e \'DROP DATABASE IF EXISTS iTrust2_test\'"
-                    sh "pgrep chrome | sudo xargs kill -9"
-                    sh "sudo kill \$(lsof -t -i:9001)"
+                    sh "bash /bakerx/cm/scripts/cleanup.sh"
                 }
             }
         }
