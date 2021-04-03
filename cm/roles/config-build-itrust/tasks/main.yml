@@ -69,6 +69,7 @@
   with_items:
     - '/home/vagrant/.my.cnf'
     - '/root/.my.cnf'
+    - '/etc/my.cnf'
   become: yes
 
 - name: Removes anonymous MySQL user account for localhost
