@@ -35,7 +35,7 @@ function main()
 {
     console.log( chalk.yellow("\nPopulating list of files to analyse..."));
 
-    // let directory_name = " site";
+    // let directory_name = "site";
     let directory_name = path.join(path.sep, 'var', 'lib', 'jenkins', 'workspace', 'checkbox.io', 'server-side');
     console.log(chalk.cyan(`Directory path: ${directory_name}`));
 
@@ -59,20 +59,21 @@ function main()
     {
         var builder = builders[node];
         builder.report();
+
         if( builder.Length > LOC_threshold )
         {
             fail_flag = true;
-            console.log(chalk.bgRed("Function length exceeds 100 LOC. Build will be FAILED!!"));
+            console.log(chalk.bgRed(`\nFunction length exceeds ${LOC_threshold} LOC. Build will be FAILED!!`));
         }
-        else if( builder.MaxChainCount > MessageChain_threshold )
+        if( builder.MaxChainCount > MessageChain_threshold )
         {
             fail_flag = true;
-            console.log(chalk.bgRed("Message chain greater than 10 detected. Build will be FAILED!!"));
+            console.log(chalk.bgRed(`\nMessage chain greater than ${MessageChain_threshold} detected. Build will be FAILED!!`));
         }
-        else if( builder.MaxNestingDepth > NestingDepth_threshold )
+        if( builder.MaxNestingDepth > NestingDepth_threshold )
         {
             fail_flag = true;
-            console.log(chalk.bgRed("Nesting depth greater than 5 detected. Build will be FAILED!!"));
+            console.log(chalk.bgRed(`\nNesting depth greater than ${NestingDepth_threshold} detected. Build will be FAILED!!`));
         }
     }
 
@@ -130,23 +131,22 @@ function complexity(filePath, builders)
             var maxDepth = 0;
             traverseWithParents(node, function (child)
             {
-                if ( childrenLength(child) == 0 )
+                if ( childrenLength(child) == 0  )
                 {
                     let depth=0;
                     let n=child;
                     while( n.type != "FunctionDeclaration" )
                     {
-                        if( isDecision(n) )
+                        if( isDecision(n) && n.parent.alternate == null )
                         {
                             depth++;
                         }
                         n = n.parent;
                     }
 
-                    maxDepth = Math.max(depth, maxDepth);
+                    builder.MaxNestingDepth = Math.max(depth, builder.MaxNestingDepth);
                 }
             });
-            builder.MaxNestingDepth = maxDepth;
 
             builders[builder.FunctionName] = builder;
         }
