@@ -106,6 +106,7 @@ function complexity(filePath, builders)
             builder.StartLine    = node.loc.start.line;
 
             // Calculate function level properties.
+            builder.ParameterCount = node.params.length;
 
             // 1. Method Length
             builder.Length = node.loc.end.line - node.loc.start.line;
@@ -161,6 +162,8 @@ class FunctionBuilder
     constructor() {
         this.StartLine = 0;
         this.FunctionName = "";
+        // The number of parameters for functions
+        this.ParameterCount  = 0;
         // The number of lines.
         this.Length = 0;
         // The max depth of scopes (nested ifs, loops, etc)
@@ -172,6 +175,7 @@ class FunctionBuilder
         this.LengthColour = this.Length;
         this.MaxNestingDepthColour = this.MaxNestingDepth;
         this.MaxChainCountColour = this.MaxChainCount;
+        this.ParameterCountColour = this.ParameterCount;
     }
 
     threshold() {
@@ -179,7 +183,8 @@ class FunctionBuilder
         const thresholds = {
             MaxNestingDepth: [{t: NestingDepth_threshold, color: 'red'}, {t: 3, color: 'yellow'}],
             MaxChainCount: [{t: MessageChain_threshold, color: 'red'}, {t: 5, color: 'yellow'}],
-            Length: [{t: LOC_threshold, color: 'red'}, {t: 10, color: 'yellow'}]
+            Length: [{t: LOC_threshold, color: 'red'}, {t: 10, color: 'yellow'}],
+            ParameterCount: [{t: 10, color: 'red'}, {t: 3, color: 'yellow'}]
         }
 
         const showScore = (id, value) => {
@@ -189,7 +194,7 @@ class FunctionBuilder
             return score.color;
         };
 
-
+        this.ParameterCountColour = chalk`{${showScore('ParameterCount', this.ParameterCount)} ${this.ParameterCount}}`;
         this.LengthColour = chalk`{${showScore('Length', this.Length)} ${this.Length}}`;
         this.MaxChainCountColour = chalk`{${showScore('MaxChainCount', this.MaxChainCount)} ${this.MaxChainCount}}`;
         this.MaxNestingDepthColour = chalk`{${showScore('MaxNestingDepth', this.MaxNestingDepth)} ${this.MaxNestingDepth}}`;
@@ -202,8 +207,8 @@ class FunctionBuilder
 
         console.log(
 chalk`\n{cyan.underline ${this.FunctionName}}(): at line #${this.StartLine}
-\nLength: ${this.LengthColour}
-MaxDepth: ${this.MaxNestingDepthColour}\tMaxChainCount: ${this.MaxChainCountColour}\n`
+\nParameters: ${this.ParameterCountColour}\tLength: ${this.LengthColour}
+MaxDepth: ${this.MaxNestingDepthColour}\tMaxChainCount: ${this.MaxChainCountColour}`
 );
     }
 };
