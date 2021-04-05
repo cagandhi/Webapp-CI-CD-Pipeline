@@ -1,0 +1,19 @@
+{
+  "name": "fuzz",
+  "version": "1.0.0",
+  "description": "fuzz-workshop",
+  "main": "main.js",
+  "scripts": {
+    "test": "cross-env NODE_ENV=test mocha --reporter spec"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "json5": "^2.2.0",
+    "marked": "0.8.0",
+    "pug": "^3.0.2",
+    "random-js": "^2.1.0",
+    "underscore": "^1.12.0"
+  }
+}
