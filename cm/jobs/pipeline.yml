@@ -1,5 +1,5 @@
 - job:
-    name: pip
+    name: checkbox.io
     project-type: pipeline
     dsl: |
         pipeline {
@@ -24,6 +24,11 @@
                 stage('Start up server js') {
                     steps {
                         sh "cd server-side/site && pm2 start server.js"
+                    }
+                }
+                stage('Static analysis') {
+                    steps {
+                        sh "cd /bakerx/testanalysis/static-analysis/ && npm install && node static_analysis.js"
                     }
                 }
                 stage('Test'){
