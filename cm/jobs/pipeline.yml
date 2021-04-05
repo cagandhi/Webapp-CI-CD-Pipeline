@@ -28,7 +28,7 @@
                 }
                 stage('Static analysis') {
                     steps {
-                        sh "cd /bakerx/testanalysis/static-analysis/ && npm install && node static_analysis.js"
+                        sh "cd /bakerx/testanalysis/static-analysis/ && sudo npm install && node static_analysis.js --colors"
                     }
                 }
                 stage('Test'){

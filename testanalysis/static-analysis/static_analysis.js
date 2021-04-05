@@ -53,11 +53,10 @@ function main()
     console.log( chalk.yellow("\nPrinting static analysis reports..."));
 
 
-    let fail_flag;
+    let fail_flag = false;
     // Report
     for( var node in builders )
     {
-        fail_flag = false;
         var builder = builders[node];
         builder.report();
         if( builder.Length > LOC_threshold )
@@ -202,7 +201,7 @@ class FunctionBuilder
         this.threshold();
 
         console.log(
-chalk`{cyan.underline ${this.FunctionName}}(): at line #${this.StartLine}
+chalk`\n{cyan.underline ${this.FunctionName}}(): at line #${this.StartLine}
 \nLength: ${this.LengthColour}
 MaxDepth: ${this.MaxNestingDepthColour}\tMaxChainCount: ${this.MaxChainCountColour}\n`
 );
