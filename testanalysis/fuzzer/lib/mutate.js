@@ -1,40 +1,3 @@
-// function mutateString (mutator, val) {
-
-//     // Step 3. Replace single quotes strings with integers
-//     if( mutator.random().bool(0.5) )
-//     {
-//         randnum = mutator.random().integer(0,100)
-//         val = val.replace(/'\w+'/g, randnum)
-        
-//     }
-
-//     var array = val.split('');
-//     // array.reverse();
-//     do{
-//         if( mutator.random().bool(0.25) )
-//         {
-//             // Step 1. Randomly remove a random set of characters, from a random start position.
-//             // console.log(array.length);
-//             random_start_position = mutator.random().integer(0,array.length-1);
-//             random_delete_count = mutator.random().integer(0, array.length-random_start_position);
-//             array.splice(random_start_position, random_delete_count);
-//         }
-//         if( mutator.random().bool(0.25) )
-//         {
-//             // Step 2. Randomly add a set of characters.
-//             random_start_position = mutator.random().integer(0,array.length-1);
-//             random_characters = mutator.random().string(10);
-//             array.splice( random_start_position, 0, ...random_characters);
-
-//         }
-//     } while(mutator.random().bool(0.25));
-
-//     return array.join('');
-// }
-
-// exports.mutateString = mutateString;
-
-
 function mutateString (mutator, line) {
     // Using 50% probabilitiy for each fuzzing operation, thus, a random subset of all fuzzing operations.
 
@@ -53,7 +16,16 @@ function mutateString (mutator, line) {
     // change content of "strings" in code
     if( mutator.random().bool(0.5) )
     {
-        //placeholder
+        // repace content of "strings" with random string
+        words = line.split(' ')
+        for(var i = 0; i< words.length;i++){
+            word_len = words[i].length
+            if(words[i][0] == '"' && words[i][word_len-1] == '"'){
+                randnum = mutator.random().integer(0,100)
+                words[i] = mutator.random().string(randnum)
+            }
+        }
+        line = words.join(' ')
         
     }
     
@@ -66,10 +38,19 @@ function mutateString (mutator, line) {
     
     // 2 more mutation operations of your choice.
 
-    // mutation 1  (replace a number with random numer)
+    // mutation 1  (replace a number with another random number)
     if( mutator.random().bool(0.5) )
     {
-        // placeholder
+        words = line.split(' ')
+        for(var i = 0; i< words.length;i++){
+            
+            if(!isNaN(words[i])){                               // if it is a valid number
+                randnum = mutator.random().integer(0,100)
+                words[i] = mutator.random().string(randnum)
+            }
+        }
+
+        line = words.join(' ')
     }
 
     // mutation 2 (swap 'true' with 'false')
