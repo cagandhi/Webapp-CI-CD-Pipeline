@@ -21,6 +21,76 @@ class mutater {
 
 };
 
+function remove_comments(s_split) {
+    // remove "// this is a comment" kind of comments
+    // for punctuation list, see https://remarkablemark.org/blog/2019/09/28/javascript-remove-punctuation/
+    var regex_comm1 = /^\/\/[\s]*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+
+    // for multi line comments which are like
+    // /*
+    // * comm1
+    // * comm2
+    // */
+    var regex_comm2 = /^\*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+    var regex_comm3 = /\/\*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+    var regex_comm4 = /[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*\*\/$/g
+
+    for (var i = 0; i < s_split.length; i++) {
+        s_split[i] = s_split[i].replace(regex_comm1, '').trim();
+        s_split[i] = s_split[i].replace(regex_comm2, '').trim();
+        s_split[i] = s_split[i].replace(regex_comm3, '').trim();
+        s_split[i] = s_split[i].replace(regex_comm4, '').trim();
+    }
+
+    return s_split;
+}
+
+function get_valid_index_set(s_split_filter) {
+    // for each line in s_split_ array, store valid index in index_array
+    // valid index array does not include index of lines such as:
+    // 1. decorator lines @Override, etc.
+    // 2. import and package statements
+    // 3. bracket lines
+
+    var regex_at_lines = /^@[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+    var regex_import_package = /^(import|package)[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+    
+    var valid_index_set = new Set();
+    for (var i = 0; i < s_split_filter.length; i++) {
+        var ele = s_split_filter[i].trim();
+
+        console.log("\n----");
+        console.log(ele);
+        console.log(regex_at_lines.test(ele) || regex_import_package.test(ele));
+        // console.log(regex_import_package.test(ele));
+        // ignore @ lines, package and import statements and open and close brackets
+        if ( regex_at_lines.test(ele) || regex_import_package.test(ele) || ele == '{' || ele == '}' ) {
+            // continue;
+        }
+        else
+        {
+            console.log(i);
+            valid_index_set.add(i);
+        }
+    }
+    console.log(valid_index_set);
+    return valid_index_set;
+}
+
+
+function remove_at_imp_pkg(s_split_filter) {
+    var regex_at_lines = /^@[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+    var regex_import_package = /^(import|package)[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+    
+    for (var i = 0; i < s_split_filter.length; i++) {
+        s_split_filter[i] = s_split_filter[i].replace(regex_at_lines, '').trim();
+        s_split_filter[i] = s_split_filter[i].replace(regex_import_package, '').trim();
+    }
+
+    return s_split_filter;
+}
+
+
 function mtfuzz(iterations, seeds, testFn)
 {
     var failedTests = [];
@@ -35,6 +105,7 @@ function mtfuzz(iterations, seeds, testFn)
         // Toggle between seed filepaths
         let idx = ((i % seeds.length) + seeds.length) % seeds.length;
 
+        console.log(chalk.yellow(`${seeds[idx]}`));
         // --- apply random mutation to seed file content ---
         // read file contents as string
         let s = fs.readFileSync(seeds[ idx ], 'utf-8');
@@ -49,24 +120,30 @@ function mtfuzz(iterations, seeds, testFn)
         console.log("BEFORE REMOVING COMMENTS");
         console.log(s_split);
         
-        // for each line in s_split array, store valid index in index_array
-        var index_array = {};
+        // call remove_comments to filter out comment lines from the filelines array
+        s_split = remove_comments(s_split);
 
-        // remove "// this is a comment" kind of comments
-        // for punctuation list, see https://remarkablemark.org/blog/2019/09/28/javascript-remove-punctuation/
-        var regex_comm1 = /^\/\/[\s]*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-        for (var i = 0; i < s_split.length; i++) {
-            s_split[i] = s_split[i].replace(regex_comm1, '');
-        }
+        // ----- testing start ----
+        // s_split = remove_at_imp_pkg(s_split);
+        // ----- testing end ----
 
         // remove undefined or empty string from s_split list, see https://stackoverflow.com/a/281335
         var s_split_filter = s_split.filter(function(e) {
             return (e != '' && e != null);
-        })
-
-        console.log("AFTER REMOVING COMMENTS and empty lines");
+        });
+        
+        
+        console.log("AFTER REMOVING COMMENTS AND FILTERING EMPTY LINES");
         console.log(s_split_filter);
+        
+
+        // create a set of valid index on which mutation operations will be run
+        var valid_index_set = get_valid_index_set(s_split_filter);
+
+        console.log("PRINTING VALID INDEX SET");
+        console.log(valid_index_set);
         break;
+        // RUN MUTATION OPERATIONS ON LINES PRESENT IN VALID INDEX SET
 
         // // apply fuzzing operations on the original file
         // let mutuatedString = mutater.str(s);

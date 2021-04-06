@@ -27,4 +27,4 @@ cp /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml.template 
 . /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml
 
 # call index.js in fuzzer to perform mutation testing with $c iterations
-cd /bakerx/testanalysis/fuzzer && node index.js $c
+cd /bakerx/testanalysis/fuzzer && node index.js $c --colors
