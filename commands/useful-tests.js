@@ -17,7 +17,8 @@ exports.builder = yargs => {
         n_iterations: {
             alias: 'c',
             describe: 'number of iterations',
-            type: 'number'
+            type: 'number',
+            default: 1000
         },
         gh_user: {
             alias: 'gh-user',

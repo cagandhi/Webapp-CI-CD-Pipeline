@@ -38,10 +38,35 @@ function mtfuzz(iterations, seeds, testFn)
         // --- apply random mutation to seed file content ---
         // read file contents as string
         let s = fs.readFileSync(seeds[ idx ], 'utf-8');
-        console.log("--- Printing string --- ");
-        console.log(s);
-        // split file content by newline and strip start and end spaces for each line in file
 
+        // split file content by newline and strip start and end spaces for each line in file
+        let s_split = s.split("\n");
+
+        for (var i = 0; i < s_split.length; i++) {
+            s_split[i] = s_split[i].trim();
+        }
+        
+        console.log("BEFORE REMOVING COMMENTS");
+        console.log(s_split);
+        
+        // for each line in s_split array, store valid index in index_array
+        var index_array = {};
+
+        // remove "// this is a comment" kind of comments
+        // for punctuation list, see https://remarkablemark.org/blog/2019/09/28/javascript-remove-punctuation/
+        var regex_comm1 = /^\/\/[\s]*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+        for (var i = 0; i < s_split.length; i++) {
+            s_split[i] = s_split[i].replace(regex_comm1, '');
+        }
+
+        // remove undefined or empty string from s_split list, see https://stackoverflow.com/a/281335
+        var s_split_filter = s_split.filter(function(e) {
+            return (e != '' && e != null);
+        })
+
+        console.log("AFTER REMOVING COMMENTS and empty lines");
+        console.log(s_split_filter);
+        break;
 
         // // apply fuzzing operations on the original file
         // let mutuatedString = mutater.str(s);
