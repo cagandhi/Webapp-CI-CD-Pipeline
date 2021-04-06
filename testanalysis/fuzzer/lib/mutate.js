@@ -6,13 +6,13 @@ function mutateString (mutator, line) {
     {
         line.replace(/(!=|==)/g, function($1) { return $1 === '!=' ? '==' : '!=' })
     }
-    
+
     // swap 0 with 1
     if( mutator.random().bool(0.5) )
     {
         line.replace(/(0|1)/g, function($1) { return $1 === '1' ? '0' : '1' })
     }
-    
+
     // change content of "strings" in code
     if( mutator.random().bool(0.5) )
     {
@@ -27,14 +27,14 @@ function mutateString (mutator, line) {
         }
         line = words.join(' ')
     }
-    
+
     // swap "<" with ">". Be mindful of potential impact on generics.
 
     if( mutator.random().bool(0.5) )
     {
         line.replace(/(<|>)/g, function($1) { return $1 === '<' ? '>' : '<' })
     }
-    
+
     // 2 more mutation operations of your choice.
 
     // mutation 1  (replace a number with another random number)
@@ -42,7 +42,7 @@ function mutateString (mutator, line) {
     {
         words = line.split(' ')
         for(var i = 0; i< words.length;i++){
-            
+
             if(!isNaN(words[i])){                               // if it is a valid number
                 randnum = mutator.random().integer(0,100)
                 words[i] = mutator.random().string(randnum)
@@ -58,7 +58,7 @@ function mutateString (mutator, line) {
         line.replace(/(true|false)/g, function($1) { return $1 === 'true' ? 'false' : 'true' })
     }
 
-    return line;   
+    return line;
 }
 
 exports.mutateString = mutateString;
