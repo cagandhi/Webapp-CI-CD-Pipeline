@@ -26,7 +26,6 @@ function mutateString (mutator, line) {
             }
         }
         line = words.join(' ')
-        
     }
     
     // swap "<" with ">". Be mindful of potential impact on generics.
@@ -58,7 +57,8 @@ function mutateString (mutator, line) {
     {
         line.replace(/(true|false)/g, function($1) { return $1 === 'true' ? 'false' : 'true' })
     }
-    
+
+    return line;   
 }
 
 exports.mutateString = mutateString;
