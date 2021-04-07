@@ -301,11 +301,23 @@ async function mtfuzz(iterations, seeds)
         console.log(chalk.yellow("PRINTING TEST DICT"));
         console.log(test_dict);
 
-        console.log(chalk.yellow("Useful tests\n============"));
         // sort the dictionary
-        console.log("Printing sorted_dict");
-
         var sorted_dict = sort_object(test_dict);
+        var hashset = new Set();
+
+        for( var key in sorted_dict)
+        {
+            var value = sorted_dict[key];
+            for( var x in value )
+            {
+                hashset.add(value[1]);
+            }
+        }
+
+        let mutation_per = (hashset.size*100)/iterations;
+        console.log(chalk.yellow(`Overall mutation coverage: ${hashset.size}/${iterations} (${mutation_per}%) mutations caught by the test suite`));
+        
+        console.log(chalk.yellow("Useful tests\n============"));
         for( var key in sorted_dict)
         {
             var value = sorted_dict[key];
@@ -314,10 +326,10 @@ async function mtfuzz(iterations, seeds)
             for( var x in value )
             {
                 console.log("\n\t- "+value[1]);
+                hashset.add(value[1]);
             }
             console.log("\n");
         }
-        console.log("Printing sorted obj ends");
     }
     catch(e)
     {
