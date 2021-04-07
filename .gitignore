@@ -1,3 +1,6 @@
+# ignore mutations directory
+**/.mutations
+
 # Ignore node modules
 */node_modules/
 

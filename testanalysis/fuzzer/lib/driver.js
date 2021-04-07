@@ -115,12 +115,18 @@ function sort_object(obj) {
         return second[1].length - first[1].length;
     });
 
-    sorted_obj={}
-    $.each(items, function(k, v) {
-        use_key = v[0]
-        use_value = v[1]
-        sorted_obj[use_key] = use_value
-    })
+    var sorted_obj={};
+    for( var v in items)
+    {
+        let key = v[0];
+        let value = v[1];
+        sorted_obj[key] = value;
+    }
+    // $.each(items, function(k, v) {
+    //     use_key = v[0]
+    //     use_value = v[1]
+    //     sorted_obj[use_key] = use_value
+    // })
     return sorted_obj
 }
 
@@ -135,6 +141,8 @@ async function mtfuzz(iterations, seeds)
     console.log(chalk.green(`Fuzzing with ${iterations} randomly generated-inputs.`))
 
     let skip_finally_flag = false;
+    var test_dict = {};
+
     for (var i = 1; i <= iterations; i++) {
 
         skip_finally_flag = false;
@@ -169,8 +177,15 @@ async function mtfuzz(iterations, seeds)
         mutated_file = file_lines.join('\n')
         console.log(chalk.yellow(`value of i: ${i}`));
 
-        mutated_path = path.join('.mutations', i.toString());
+        mutations_dir = '/bakerx/testanalysis/fuzzer/.mutations'
+        if( !fs.existsSync(mutations_dir) ) {
+            console.log(chalk.cyan(`Created new mutations dir at ${mutations_dir}`));
+            fs.mkdirSync(mutations_dir);
+        }
+
+        mutated_path = path.join(mutations_dir, i.toString());
         if( !fs.existsSync(mutated_path) ) {
+            console.log(chalk.cyan(`Created new iterations dir at ${mutated_path}`));
             fs.mkdirSync(mutated_path);
         }
 
@@ -178,6 +193,7 @@ async function mtfuzz(iterations, seeds)
         var filename = path.parse(seeds[idx]).base;
         fs.writeFileSync(path.join( mutated_path, filename), mutated_file);
 
+        console.log("\nWROTE "+filename+" IN "+mutated_path);
         var testsuite_dir = path.join(path.sep, 'home', 'vagrant', 'iTrust2-v8', 'iTrust2');
 
         // run given function under test with input
@@ -199,6 +215,7 @@ async function mtfuzz(iterations, seeds)
             // check for compilation error
             if( !fs.existsSync( path.join(testsuite_dir, 'target', 'surefire-reports') ) )
             {
+                console.log(chalk.cyan("Compilation Error faced"));
                 i--;
                 skip_finally_flag = true;
                 continue;
@@ -222,10 +239,39 @@ async function mtfuzz(iterations, seeds)
                 // parse test report here
                 let filelist = getTestReports(testsuite_dir);
 
+                console.log("outside filelist for loop");
+
                 // generate report dictionary here
-                var test_dict = {};
-                filelist.forEach(async file => {
+                // filelist.forEach(async file => {
+                //     let tests = await getTestResults(file);
+                //     console.log(chalk.cyan("in filelist for loop"));
+                //     console.log(chalk.yellow(`${file}`));
+
+                //     tests.forEach(e => {
+                //         let test_name = e.name;
+                //         let test_time = e.time;
+                //         let test_status = e.status;
+
+                //         // if test name exists in dictionary, append (time, status) array to the value array
+                //         if( test_name in test_dict )
+                //         {
+                //             if( test_status == 'failed' )
+                //                 test_dict[name].push([test_time, path.join( mutated_path, filename)]);
+                //         }
+                //         else
+                //         {
+                //             test_dict[test_name] = [[test_time, path.join( mutated_path, filename)]];
+                //         }
+
+                //         console.log(chalk.yellow(`${test_name}\t${test_time}\t${test_status}`));
+                //     });
+                // });
+
+                for (var i = 0; i < filelist.length; i++) {
+                    let file = filelist[i];
+
                     let tests = await getTestResults(file);
+                    console.log(chalk.cyan("in filelist for loop"));
                     console.log(chalk.yellow(`${file}`));
 
                     tests.forEach(e => {
@@ -233,37 +279,49 @@ async function mtfuzz(iterations, seeds)
                         let test_time = e.time;
                         let test_status = e.status;
 
-                        // if test name exists in dictionary, append (time, status) array to the value array
-                        if( test_name in test_dict )
+                        // store stats only when test is failed
+                        if( test_status == 'failed' )
                         {
-                            if( e.status == 'failed' )
-                                test_dict[name].push([e.time, path.join( mutated_path, filename)]);
-                        }
-                        else
-                        {
-                            test_dict[test_name] = [[e.time, path.join( mutated_path, filename)]];
+                            // if test name exists in dictionary, append (time, status) array to the value array
+                            if( test_name in test_dict )
+                                test_dict[name].push([test_time, path.join( mutated_path, filename)]);
+                            // else create a new 2d list with the first element
+                            else
+                                test_dict[test_name] = [[test_time, path.join( mutated_path, filename)]];
                         }
 
-                        // console.log(e);
+                        console.log(chalk.yellow(`\n${test_name}\t${test_time}\t${test_status}`));
                     });
-                });
-
-                console.log(chalk.yellow("Useful tests\n============"));
-                // sort the dictionary
-                var sorted_dict = sort_object(test_dict);
-                for( var key in sorted_dict)
-                {
-                    var value = sorted_dict[key];
-
-                    console.log("\n"+value.length+"/"+iterations+"  "+key);
-                    for( var x in value )
-                    {
-                        console.log("\n\t- "+value[1]);
-                    }
-                    console.log("\n");
                 }
             }
         }
+    }
+    try
+    {
+        console.log(chalk.yellow("PRINTING TEST DICT"));
+        console.log(test_dict);
+
+        console.log(chalk.yellow("Useful tests\n============"));
+        // sort the dictionary
+        console.log("Printing sorted_dict");
+
+        var sorted_dict = sort_object(test_dict);
+        for( var key in sorted_dict)
+        {
+            var value = sorted_dict[key];
+
+            console.log("\n"+value.length+"/"+iterations+"  "+key);
+            for( var x in value )
+            {
+                console.log("\n\t- "+value[1]);
+            }
+            console.log("\n");
+        }
+        console.log("Printing sorted obj ends");
+    }
+    catch(e)
+    {
+        console.log(e);
     }
 }
 
