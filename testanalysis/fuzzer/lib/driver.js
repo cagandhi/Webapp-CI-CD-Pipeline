@@ -26,7 +26,7 @@ class mutater {
 };
 
 // function to return a set of valid indexes
-function get_valid_index_set(s_split_filter) {    
+function get_valid_index_set(s_split_filter) {
     var valid_index_set = new Set();
     for (var i = 0; i < s_split_filter.length; i++) {
         var ele = s_split_filter[i].trim();
@@ -45,7 +45,7 @@ function get_valid_index_set(s_split_filter) {
 
 function getTestReports(testdir) {
     // '/simplecalc/target/surefire-reports/TEST-com.github.stokito.unitTestExample.calculator.CalculatorTest.xml';
-    
+
     let testReportBase = `${testdir}/target/surefire-reports/`;
     const files = fs.readdirSync(testReportBase);
 
@@ -105,6 +105,26 @@ function getRandomItem(set) {
     return items[Math.floor(Math.random() * items.length)];
 }
 
+// refer https://stackoverflow.com/a/53530097/6543250
+function sort_object(obj) {
+    items = Object.keys(obj).map(function(key) {
+        return [key, obj[key]];
+    });
+
+    items.sort(function(first, second) {
+        return second[1].length - first[1].length;
+    });
+
+    sorted_obj={}
+    $.each(items, function(k, v) {
+        use_key = v[0]
+        use_value = v[1]
+        sorted_obj[use_key] = use_value
+    })
+    return sorted_obj
+}
+
+
 async function mtfuzz(iterations, seeds)
 {
     var failedTests = [];
@@ -114,14 +134,17 @@ async function mtfuzz(iterations, seeds)
 
     console.log(chalk.green(`Fuzzing with ${iterations} randomly generated-inputs.`))
 
+    let skip_finally_flag = false;
     for (var i = 1; i <= iterations; i++) {
+
+        skip_finally_flag = false;
 
         // choose a random index
         // let idx = ((i % seeds.length) + seeds.length) % seeds.length;
         let idx = Math.floor(Math.random() * seeds.length)
         console.log(chalk.yellow(`${seeds[idx]}`));
-        
-        // read file contents as string
+
+        // read original file contents as string
         let file = fs.readFileSync(seeds[ idx ], 'utf-8');
 
         // split file content by newline and strip start and end spaces for each line in file
@@ -133,7 +156,7 @@ async function mtfuzz(iterations, seeds)
 
         for (var j = 0; j < ten_percent_length; j++) {
             let randomLine_index = getRandomItem(valid_indexes);
-            
+
             // console.log(randomLine_index, file_lines[randomLine_index]);
             file_lines[randomLine_index] = mutater.str(file_lines[randomLine_index])
             valid_indexes.delete(randomLine_index)
@@ -142,29 +165,34 @@ async function mtfuzz(iterations, seeds)
             }
 
         }
+        // create mutated file
         mutated_file = file_lines.join('\n')
         console.log(chalk.yellow(`value of i: ${i}`));
-        if( !fs.existsSync(`.mutations/${i}/`) )
-        {
-            fs.mkdirSync(`.mutations/${i}/`);
+
+        mutated_path = path.join('.mutations', i.toString());
+        if( !fs.existsSync(mutated_path) ) {
+            fs.mkdirSync(mutated_path);
         }
+
+        // write mutated file to mutations dir
         var filename = path.parse(seeds[idx]).base;
-        fs.writeFileSync(path.join( `.mutations/${i}/`, filename), mutated_file);        
+        fs.writeFileSync(path.join( mutated_path, filename), mutated_file);
 
         var testsuite_dir = path.join(path.sep, 'home', 'vagrant', 'iTrust2-v8', 'iTrust2');
+
         // run given function under test with input
         try
         {
             // replace original file by mutated file in itrust repo
-            fs.copyFile(path.join( `.mutations/${i}/`, filename), seeds[idx],(err) => {
+            fs.copyFile(path.join( mutated_path, filename), seeds[idx],(err) => {
                 if (err) throw err;
             });
-            
+
             console.log(chalk.yellow(`Testsuite dir: ${testsuite_dir}`));
             console.log(chalk.yellow(`Running mvn clean test....`));
             await child.execSync('sudo mvn clean test', {cwd: testsuite_dir, stdio: ['ignore', 'ignore', 'ignore']});
-            passedTests++;
-            console.log(chalk.yellow(`After mvn test run. Passed tests count: ${passedTests}`));
+            // passedTests++;
+            console.log(chalk.yellow('After mvn test run'));
         }
         catch(e)
         {
@@ -172,60 +200,71 @@ async function mtfuzz(iterations, seeds)
             if( !fs.existsSync( path.join(testsuite_dir, 'target', 'surefire-reports') ) )
             {
                 i--;
+                skip_finally_flag = true;
                 continue;
             }
             // else, build failure. continue finally block execution bcoz test.xml is generated
-            else
+            // else
+            // {
+            //     failedTests.push( {input:mutuatedString, stack: e.stack, id: i} );
+            // }
+        }
+        finally
+        {
+            // this flag will be true when compilation error. When compilation error, don't execute anything in finally block
+            if( !skip_finally_flag )
             {
-                failedTests.push( {input:mutuatedString, stack: e.stack, id: i} );
+                // when mvn test has run, even if build failure, write the original file back into itrust repo
+                fs.writeFileSync(seeds[idx], file);
+
+                console.log('in finally block');
+                console.log(chalk.cyan(`ITERATION ${i}`));
+                // parse test report here
+                let filelist = getTestReports(testsuite_dir);
+
+                // generate report dictionary here
+                var test_dict = {};
+                filelist.forEach(async file => {
+                    let tests = await getTestResults(file);
+                    console.log(chalk.yellow(`${file}`));
+
+                    tests.forEach(e => {
+                        let test_name = e.name;
+                        let test_time = e.time;
+                        let test_status = e.status;
+
+                        // if test name exists in dictionary, append (time, status) array to the value array
+                        if( test_name in test_dict )
+                        {
+                            if( e.status == 'failed' )
+                                test_dict[name].push([e.time, path.join( mutated_path, filename)]);
+                        }
+                        else
+                        {
+                            test_dict[test_name] = [[e.time, path.join( mutated_path, filename)]];
+                        }
+
+                        // console.log(e);
+                    });
+                });
+
+                console.log(chalk.yellow("Useful tests\n============"));
+                // sort the dictionary
+                var sorted_dict = sort_object(test_dict);
+                for( var key in sorted_dict)
+                {
+                    var value = sorted_dict[key];
+
+                    console.log("\n"+value.length+"/"+iterations+"  "+key);
+                    for( var x in value )
+                    {
+                        console.log("\n\t- "+value[1]);
+                    }
+                    console.log("\n");
+                }
             }
         }
-        finally{
-            console.log('in finally block');
-            console.log(chalk.cyan(`ITERATION ${i}`));
-            // parse test report here
-            let filelist = getTestReports(testsuite_dir);
-
-            filelist.forEach(async file => {
-                let tests = await getTestResults(file);
-                console.log(chalk.yellow(`${file}`));
-                // console.log(tests);
-                tests.forEach(e => {
-                    console.log(e);
-                });
-            });
-        }
     }
-
-    // reduced = {};
-    // // RESULTS OF FUZZING
-    // for( var i =0; i < failedTests.length; i++ )
-    // {
-    //     var failed = failedTests[i];
-
-    //     var trace = failed.stack.split("\n");
-    //     var msg = trace[0];
-    //     var at = trace[1];
-    //     console.log( msg );
-    //     // console.log( failed.stack );
-
-    //     if( !reduced.hasOwnProperty( at ) )
-    //     {
-
-    //         reduced[at] = `${chalk.red(msg)}\nFailed with input: .mutations/${failed.id}.txt\n${chalk.grey(failed.stack)}`;
-    //     }
-    // }
-
-    // console.log("\n" + chalk.underline(`Finished ${iterations} runs.`));
-    // console.log(`passed: ${chalk.green(passedTests)}, exceptions: ${chalk.red(failedTests.length)}, faults: ${chalk.blue(Object.keys(reduced).length)}`);
-
-    // console.log("\n" + chalk.underline("Discovered faults."));
-    // console.log();
-    // for( var key in reduced )
-    // {
-    //     console.log( reduced[key] );
-    // }
-
 }
 
 exports.mtfuzz = mtfuzz;
