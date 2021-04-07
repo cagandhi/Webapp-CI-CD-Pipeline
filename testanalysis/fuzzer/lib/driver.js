@@ -1,8 +1,12 @@
 const fs = require('fs');
+const child = require('child_process');
 const path = require('path');
 const Random = require('random-js');
 const chalk = require('chalk');
 const mutateStr = require('./mutate').mutateString;
+const xml2js = require('xml2js');
+const parser = new xml2js.Parser();
+const Bluebird = require('bluebird');
 
 class mutater {
     static random() {
@@ -21,149 +25,176 @@ class mutater {
 
 };
 
-function remove_comments(s_split) {
-    // remove "// this is a comment" kind of comments
-    // for punctuation list, see https://remarkablemark.org/blog/2019/09/28/javascript-remove-punctuation/
-    var regex_comm1 = /^\/\/[\s]*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-
-    // for multi line comments which are like
-    // /*
-    // * comm1
-    // * comm2
-    // */
-    var regex_comm2 = /^\*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-    var regex_comm3 = /\/\*[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-    var regex_comm4 = /[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*\*\/$/g
-
-    for (var i = 0; i < s_split.length; i++) {
-        s_split[i] = s_split[i].replace(regex_comm1, '').trim();
-        s_split[i] = s_split[i].replace(regex_comm2, '').trim();
-        s_split[i] = s_split[i].replace(regex_comm3, '').trim();
-        s_split[i] = s_split[i].replace(regex_comm4, '').trim();
-    }
-
-    return s_split;
-}
-
-function get_valid_index_set(s_split_filter) {
-    // for each line in s_split_ array, store valid index in index_array
-    // valid index array does not include index of lines such as:
-    // 1. decorator lines @Override, etc.
-    // 2. import and package statements
-    // 3. bracket lines
-
-    var regex_at_lines = /^@[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-    var regex_import_package = /^(import|package)[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-    
+// function to return a set of valid indexes
+function get_valid_index_set(s_split_filter) {    
     var valid_index_set = new Set();
     for (var i = 0; i < s_split_filter.length; i++) {
         var ele = s_split_filter[i].trim();
 
-        console.log("\n----");
-        console.log(ele);
-        console.log(regex_at_lines.test(ele) || regex_import_package.test(ele));
-        // console.log(regex_import_package.test(ele));
-        // ignore @ lines, package and import statements and open and close brackets
-        if ( regex_at_lines.test(ele) || regex_import_package.test(ele) || ele == '{' || ele == '}' ) {
+        if (ele == '' || ele == null || ele == '{' || ele == '}' || ele.startsWith('//') || ele.startsWith('/**') || ele.startsWith('*') || ele.startsWith('@')|| ele.startsWith('import') || ele.startsWith('package')) {
             // continue;
         }
         else
         {
-            console.log(i);
+            // console.log(i);
             valid_index_set.add(i);
         }
     }
-    console.log(valid_index_set);
     return valid_index_set;
 }
 
-
-function remove_at_imp_pkg(s_split_filter) {
-    var regex_at_lines = /^@[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
-    var regex_import_package = /^(import|package)[\d\w\s!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]*/g
+function getTestReports(testdir) {
+    // '/simplecalc/target/surefire-reports/TEST-com.github.stokito.unitTestExample.calculator.CalculatorTest.xml';
     
-    for (var i = 0; i < s_split_filter.length; i++) {
-        s_split_filter[i] = s_split_filter[i].replace(regex_at_lines, '').trim();
-        s_split_filter[i] = s_split_filter[i].replace(regex_import_package, '').trim();
+    let testReportBase = `${testdir}/target/surefire-reports/`;
+    const files = fs.readdirSync(testReportBase);
+
+    var filelist = files.filter(function(f) {
+        return f.includes('.xml');
+    });
+
+    for (let i = 0; i < filelist.length; i++) {
+        filelist[i] = testReportBase + filelist[i];
     }
 
-    return s_split_filter;
+    // const filename = files.find((file) => {
+    //   // return the first xml file in directory
+    //   return file.includes('.xml');
+    // });
+
+    // console.log( chalk.green(`Found test report ${filename}`) );
+    // return testReportBase + filename;
+    console.log("FILE LIST in getTestReports()");
+    console.log(filelist);
+
+    return filelist;
 }
 
+async function getTestResults(testReport)
+{
+    // console.log("in getTestResults");;
+    var contents = fs.readFileSync(testReport)
+    let xml2json = await Bluebird.fromCallback(cb => parser.parseString(contents, cb));
+    let tests = readMavenXmlResults(xml2json);
+    return tests;
+}
 
-function mtfuzz(iterations, seeds, testFn)
+function readMavenXmlResults(result)
+{
+    // console.log("start mavenxml");
+    var tests = [];
+    for( var i = 0; i < result.testsuite['$'].tests; i++ )
+    {
+        var testcase = result.testsuite.testcase[i];
+
+        tests.push({
+        name:   testcase['$'].name,
+        time:   testcase['$'].time,
+        status: testcase.hasOwnProperty('failure') ? "failed": "passed"
+        });
+    }
+
+    // console.log("in mavenxml");
+    // console.log(tests);
+    return tests;
+}
+
+// Refer https://stackoverflow.com/questions/42739256
+function getRandomItem(set) {
+    let items = Array.from(set);
+    return items[Math.floor(Math.random() * items.length)];
+}
+
+async function mtfuzz(iterations, seeds)
 {
     var failedTests = [];
     var passedTests = 0;
 
     mutater.seed(0);
 
-    console.log(chalk.green(`Fuzzing '${testFn}' with ${iterations} randomly generated-inputs.`))
+    console.log(chalk.green(`Fuzzing with ${iterations} randomly generated-inputs.`))
 
     for (var i = 1; i <= iterations; i++) {
 
-        // Toggle between seed filepaths
-        let idx = ((i % seeds.length) + seeds.length) % seeds.length;
-
+        // choose a random index
+        // let idx = ((i % seeds.length) + seeds.length) % seeds.length;
+        let idx = Math.floor(Math.random() * seeds.length)
         console.log(chalk.yellow(`${seeds[idx]}`));
-        // --- apply random mutation to seed file content ---
+        
         // read file contents as string
-        let s = fs.readFileSync(seeds[ idx ], 'utf-8');
+        let file = fs.readFileSync(seeds[ idx ], 'utf-8');
 
         // split file content by newline and strip start and end spaces for each line in file
-        let s_split = s.split("\n");
+        let file_lines = file.split("\n");
 
-        for (var i = 0; i < s_split.length; i++) {
-            s_split[i] = s_split[i].trim();
+        let valid_indexes = get_valid_index_set(file_lines);
+        let ten_percent_length = Math.ceil(0.1*file_lines.length); // 4
+        // Run fuzzer on 10% of file_lines
+
+        for (var j = 0; j < ten_percent_length; j++) {
+            let randomLine_index = getRandomItem(valid_indexes);
+            
+            // console.log(randomLine_index, file_lines[randomLine_index]);
+            file_lines[randomLine_index] = mutater.str(file_lines[randomLine_index])
+            valid_indexes.delete(randomLine_index)
+            if(valid_indexes.size == 0){
+                break;
+            }
+
         }
-        
-        console.log("BEFORE REMOVING COMMENTS");
-        console.log(s_split);
-        
-        // call remove_comments to filter out comment lines from the filelines array
-        s_split = remove_comments(s_split);
+        mutated_file = file_lines.join('\n')
+        console.log(chalk.yellow(`value of i: ${i}`));
+        if( !fs.existsSync(`.mutations/${i}/`) )
+        {
+            fs.mkdirSync(`.mutations/${i}/`);
+        }
+        var filename = path.parse(seeds[idx]).base;
+        fs.writeFileSync(path.join( `.mutations/${i}/`, filename), mutated_file);        
 
-        // ----- testing start ----
-        // s_split = remove_at_imp_pkg(s_split);
-        // ----- testing end ----
+        var testsuite_dir = path.join(path.sep, 'home', 'vagrant', 'iTrust2-v8', 'iTrust2');
+        // run given function under test with input
+        try
+        {
+            // replace original file by mutated file in itrust repo
+            fs.copyFile(path.join( `.mutations/${i}/`, filename), seeds[idx],(err) => {
+                if (err) throw err;
+            });
+            
+            console.log(chalk.yellow(`Testsuite dir: ${testsuite_dir}`));
+            console.log(chalk.yellow(`Running mvn clean test....`));
+            await child.execSync('sudo mvn clean test', {cwd: testsuite_dir, stdio: ['ignore', 'ignore', 'ignore']});
+            passedTests++;
+            console.log(chalk.yellow(`After mvn test run. Passed tests count: ${passedTests}`));
+        }
+        catch(e)
+        {
+            // check for compilation error
+            if( !fs.existsSync( path.join(testsuite_dir, 'target', 'surefire-reports') ) )
+            {
+                i--;
+                continue;
+            }
+            // else, build failure. continue finally block execution bcoz test.xml is generated
+            else
+            {
+                failedTests.push( {input:mutuatedString, stack: e.stack, id: i} );
+            }
+        }
+        finally{
+            console.log('in finally block');
+            console.log(chalk.cyan(`ITERATION ${i}`));
+            // parse test report here
+            let filelist = getTestReports(testsuite_dir);
 
-        // remove undefined or empty string from s_split list, see https://stackoverflow.com/a/281335
-        var s_split_filter = s_split.filter(function(e) {
-            return (e != '' && e != null);
-        });
-        
-        
-        console.log("AFTER REMOVING COMMENTS AND FILTERING EMPTY LINES");
-        console.log(s_split_filter);
-        
-
-        // create a set of valid index on which mutation operations will be run
-        var valid_index_set = get_valid_index_set(s_split_filter);
-
-        console.log("PRINTING VALID INDEX SET");
-        console.log(valid_index_set);
-        break;
-        // RUN MUTATION OPERATIONS ON LINES PRESENT IN VALID INDEX SET
-
-        // // apply fuzzing operations on the original file
-        // let mutuatedString = mutater.str(s);
-
-        // if( !fs.existsSync('.mutations') )
-        // {
-        //     fs.mkdirSync('.mutations');
-        // }
-        // fs.writeFileSync(path.join( '.mutations', `${i}.txt`), mutuatedString);
-
-        // // run given function under test with input
-        // try
-        // {
-        //     testFn(mutuatedString);
-        //     passedTests++;
-        // }
-        // catch(e)
-        // {
-        //     failedTests.push( {input:mutuatedString, stack: e.stack, id: i} );
-        // }
+            filelist.forEach(async file => {
+                let tests = await getTestResults(file);
+                console.log(chalk.yellow(`${file}`));
+                // console.log(tests);
+                tests.forEach(e => {
+                    console.log(e);
+                });
+            });
+        }
     }
 
     // reduced = {};

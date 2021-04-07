@@ -43,8 +43,11 @@ findFilesInDir(directory_name, filePathsArr);
 
 // console.log(filePathsArr);
 
-filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/config/LoginAuditingListener.java']
+// filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/config/LoginAuditingListener.java']
 // filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/services/AppointmentRequestService.java']
+// filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/repositories/security/LogEntryRepository.java']
+
+// filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/models/Patient.java']
 
 // Fuzz function 1000 (or given) times, with given seed string inputs.
 mtfuzz(runs, filePathsArr);

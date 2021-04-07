@@ -11,7 +11,7 @@ c=$1
 # remove iTrust2-v8 folder if it exists
 if [ -d /home/vagrant/iTrust2-v8/ ]
 then
-	rm -rf /home/vagrant/iTrust2-v8/
+	sudo rm -rf /home/vagrant/iTrust2-v8/
 	echo "existing directory iTrust2-v8 removed!!"
 fi
 
