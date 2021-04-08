@@ -101,7 +101,7 @@ async function run(job_name, user, password) {
     }
     else if( job_name == 'iTrust' )
     {
-        jobPath = '/bakerx/cm/jobs/iTrust-pipeline.yml';
+        jobPath = '/bakerx/cm/jobs/iTrust-pipeline-2.yml';
     }
 
     console.log(chalk.blueBright('Creating jenkins job ...'));
