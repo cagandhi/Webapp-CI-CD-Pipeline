@@ -19,7 +19,7 @@
                 stage('Build and Test - Run unit and integration tests') {
                     steps {
                         sh "cd iTrust2/ && sudo mvn clean test integration-test checkstyle:checkstyle"
-                        recordIssues tool: java(pattern: '**/csc_checkstyle.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                        recordIssues tool: java(pattern: '**/checkstyle-result.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
                     }
                 }
                 stage('Publish Test Coverage Report')
@@ -27,10 +27,18 @@
                     steps {
                         step([$class: 'JacocoPublisher',
                               execPattern: '**/*.exec',
-                              classPattern: '**/*.class',
-                              sourcePattern: 'src/main/java',
-                              exclusionPattern: 'src/test',
-                              changeBuildStatus: true
+                              minimumInstructionCoverage: '70',
+                              maximumInstructionCoverage: '80',
+                              minimumBranchCoverage: '30',
+                              maximumBranchCoverage: '50',
+                              minimumComplexityCoverage: '30',
+                              maximumComplexityCoverage: '50',
+                              minimumLineCoverage: '30',
+                              maximumLineCoverage: '60',
+                              minimumMethodCoverage: '30',
+                              maximumMethodCoverage: '60',
+                              minimumClassCoverage: '70',
+                              maximumClassCoverage: '90',
                             ])
                     }
                 }
