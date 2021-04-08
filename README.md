@@ -4,13 +4,18 @@
 
 ### Experiences and learnings about system setup
 
+* Using mutations to randomly modify code helped us learn how to expose potential faults in the codebase. We learned the impact of the quality of mutations applied. If not done intelligently, the code might result in compile failures preventing us from scrutinizing the scripts for faults.
 
+* Jacoco plugin provides code coverage metrics for Java code via integration with Jacoco. The JaCoCo Maven plug-in provides the JaCoCo runtime agent to your tests and allows basic report creation.
+ 
 
 ### Issues Faced
 
+* The tasks were computationally quite expensive. Our machines did not have enough resources to smoothly run all the tasks. Test prioritization for doing 1000 test runs was compute intensive.
+
+* Running `useful-tests` for a large number of iterations took too long. Due to this, debugging and updating parameters for this task consumed a lot of time.
 
 ### Screencast
-
 
 
 ### Checkpoint Progress Report
