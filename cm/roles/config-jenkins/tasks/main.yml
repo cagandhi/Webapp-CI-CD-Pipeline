@@ -69,8 +69,8 @@
     url_username: "{{ JENKINS_USERNAME }}"
     url_password: "{{ JENKINS_PASSWORD }}"
     url: "{{ JENKINS_URL }}"
-    timeout: 60
-  with_items: [github, jenkins-job-builder, workflow-aggregator, ws-cleanup]
+    timeout: 120
+  with_items: [github, jenkins-job-builder, workflow-aggregator, ws-cleanup, jacoco, warnings-ng]
   become: yes
 
 - name: Ensure Jenkins service is restarted after installing plugins
