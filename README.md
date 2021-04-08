@@ -4,16 +4,19 @@
 
 ### Experiences and learnings about system setup
 
-* Using mutations to randomly modify code helped us learn how to expose potential faults in the codebase. We learned the impact of the quality of mutations applied. If not done intelligently, the code might result in compile failures preventing us from scrutinizing the scripts for faults.
+* Using mutations to randomly modify code helped us learn how to expose potential faults in the codebase. We learned the impact of the quality of mutations applied. If not done intelligently, the code might result in compile failures preventing us from scrutinizing the scripts for faults. Jacoco plugin provides code coverage metrics for Java code via integration with Jacoco. The JaCoCo Maven plug-in provides the JaCoCo runtime agent to your tests and allows basic report creation.
 
-* Jacoco plugin provides code coverage metrics for Java code via integration with Jacoco. The JaCoCo Maven plug-in provides the JaCoCo runtime agent to your tests and allows basic report creation.
- 
+* Setting up an external application is tough if the documentation is incomplete. Fortunately, for the iTrust application, the instructions to run the application were provided properly however the services or applications that needed to be setup wasn't specified properly. We don't think it is a bad thing but it led to a lot of headache when the packages and services we installed didn't actually integrate well with iTrust and we had to make changes. 
+
+* Static analysis phase is important as it highlights important code smells. The metrics we recorded such as LOC of a function, nesting depth and max chains highlight important and potential issues in the code. A long method would probably be hard to understand for other people or the max chains highlights the need to follow the Law of Demeter principle.
 
 ### Issues Faced
 
-* The tasks were computationally quite expensive. Our machines did not have enough resources to smoothly run all the tasks. Test prioritization for doing 1000 test runs was compute intensive.
+* The tasks were computationally quite expensive. Our machines did not have enough resources to smoothly run all the tasks. Test prioritization for doing 1000 test runs was compute intensive. Running `useful-tests` for a large number of iterations took too long. Due to this, debugging and updating parameters for this task consumed a lot of time.
 
-* Running `useful-tests` for a large number of iterations took too long. Due to this, debugging and updating parameters for this task consumed a lot of time.
+* While working on the static analysis part, one of the main issues was the proper interpretation of the syntax tree. Although esprima made it a lot easier to visualise the tree, we needed to understand the function which implemented the visitor pattern in order to properly visit all the child nodes and calculate the max depth and max chain. For the max depth, else if statements were previously considered as a child of the preceding if. However, we had to carefully look at the syntax tree and use the alternate property in the nested visitor function to compute the correct answer.
+
+* Configuring the VM for the iTrust application had its own set of challenges. The main issue was timeouts and extremely slow installation of packages. The root cause of the issue was that iTrust is a heavy application and requires ample RAM on the VM for smooth execution. On a 1GB RAM VM, the installation of mysql froze the VM and in turn, one of the team members' laptops as well. Occasionally, we ran into Application not able to start error even when we ran the commands in a 4GB RAM VM. The solution that worked for us was to simply delete the VM and setup everything again. iTrust being a heavy application took a long time to build and that added to the headache. Overall, the build process of ITrust as an application was tricky but we are glad we were able to handle it and get it working.
 
 ### Screencast
 
