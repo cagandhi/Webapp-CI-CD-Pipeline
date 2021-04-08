@@ -48,6 +48,12 @@ findFilesInDir(directory_name, filePathsArr);
 // filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/repositories/security/LogEntryRepository.java']
 
 // filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/models/Patient.java']
+// filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/utils/EmailUtil.java']
+
+// filePathsArr = ['/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/models/ICDCode.java',
+//     '/home/vagrant/iTrust2-v8/iTrust2/src/main/java/edu/ncsu/csc/iTrust2/models/ICDCode.java']
 
 // Fuzz function 1000 (or given) times, with given seed string inputs.
 mtfuzz(runs, filePathsArr);
+
+

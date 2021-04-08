@@ -26,5 +26,12 @@ cd /bakerx/testanalysis/fuzzer && npm install
 cp /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml.template /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml
 . /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml
 
+# remove mutations folder if it exists
+if [ -d /bakerx/testanalysis/fuzzer/.mutations ]
+then
+	sudo rm -rf /bakerx/testanalysis/fuzzer/.mutations
+	echo "existing directory .mutations removed!!"
+fi
+
 # call index.js in fuzzer to perform mutation testing with $c iterations
 cd /bakerx/testanalysis/fuzzer && node index.js $c --colors
