@@ -1,8 +1,21 @@
 # DEVOPS-17 Project
 ## Milestone 2
 
-Here's the link to the [CHECKPOINT-M2.md](CHECKPOINT-M2.md).
 
+### Experiences and learnings about system setup
+
+
+
+### Issues Faced
+
+
+### Screencast
+
+
+
+### Checkpoint Progress Report
+
+Here's the link to the [CHECKPOINT-M2.md](CHECKPOINT-M2.md).
 
 ## Milestone 1
 
