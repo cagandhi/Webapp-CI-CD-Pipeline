@@ -18,6 +18,8 @@
 
 * Configuring the VM for the iTrust application had its own set of challenges. The main issue was timeouts and extremely slow installation of packages. The root cause of the issue was that iTrust is a heavy application and requires ample RAM on the VM for smooth execution. On a 1GB RAM VM, the installation of mysql froze the VM and in turn, one of the team members' laptops as well. Occasionally, we ran into Application not able to start error even when we ran the commands in a 4GB RAM VM. The solution that worked for us was to simply delete the VM and setup everything again. iTrust being a heavy application took a long time to build and that added to the headache. Overall, the build process of ITrust as an application was tricky but we are glad we were able to handle it and get it working.
 
+* Another issue we faced was getting the jacoco and checkstyle plugin to work. At first, we were confused whether we were supposed to change the pom.xml file. On diving deep into the pom.xml file, we saw that jacoco and checkstyle plugins were already installed and configured in the application. We understood that we had to install jenkins plugins that would be able to parse the reports generated. It was tough finding any documentation for jacoco plugin configuration in iTrust-pipeline.yml. A Stack Overflow answer helped us as has helped us countless times before. The configuration of these plugins taught us a lot and also showed us that sometimes, documentation would not be exact and we would need to figure out some moving parts by ourselves.
+
 ### Screencast
 
 
