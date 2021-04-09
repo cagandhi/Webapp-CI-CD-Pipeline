@@ -24,22 +24,34 @@ exports.builder = yargs => {
             describe: 'github.ncsu.edu password',
             type: 'string'
         },
+        user: {
+            alias: 'u',
+            describe: 'username for jenkins server',
+            default: 'admin',
+            type: 'string'
+        },
+        password: {
+            alias: 'p',
+            describe: 'password for jenkins server',
+            default: 'admin',
+            type: 'string'
+        },
     });
 };
 
 
 exports.handler = async argv => {
-    const { privateKey, gh_user, gh_pass } = argv;
+    const { privateKey, gh_user, gh_pass, user, password } = argv;
 
     (async () => {
 
-        await run( privateKey, gh_user, gh_pass );
+        await run( privateKey, gh_user, gh_pass, user, password );
 
     })();
 
 };
 
-async function run(privateKey, gh_user, gh_pass) {
+async function run(privateKey, gh_user, gh_pass, user, password) {
 
     console.log(chalk.greenBright('Installing configuration server!'));
 
@@ -71,4 +83,18 @@ async function run(privateKey, gh_user, gh_pass) {
     result = sshSync('/bakerx/cm/run-ansible.sh /bakerx/cm/playbook.yml /bakerx/cm/inventory.ini /bakerx/.vault-pass', 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
+    console.log(chalk.blueBright('Creating checkbox.io build job in Jenkins ...'));
+    let jobPath = '/bakerx/cm/jobs/pipeline.yml';
+    result = sshSync(`jenkins-jobs --conf /etc/jenkins_jobs.ini --user ${user} --password ${password} update ${jobPath}`, 'vagrant@192.168.33.20');
+    if( result.error ) { process.exit( result.status ); }
+
+    // replace job_name in the pipeline.yml file
+    // let result = sshSync(`ansible-playbook /bakerx/cm/jenkinsfile_playbook.yml --extra-vars "job_name=${job_name}"`, 'vagrant@192.168.33.20');
+    // if( result.error ) { process.exit( result.status ); }
+    // }
+
+    console.log(chalk.blueBright('Creating iTrust build job in Jenkins ...'));
+    jobPath = '/bakerx/cm/jobs/iTrust-pipeline.yml';
+    result = sshSync(`jenkins-jobs --conf /etc/jenkins_jobs.ini --user ${user} --password ${password} update ${jobPath}`, 'vagrant@192.168.33.20');
+    if( result.error ) { process.exit( result.status ); }
 }

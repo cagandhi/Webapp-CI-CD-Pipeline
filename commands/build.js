@@ -88,26 +88,6 @@ async function triggerBuild(job)
 
 async function run(job_name, user, password) {
 
-    // the paths should be from root of cm directory
-    // Transforming path of the job_names in host to the path in VM's shared folder
-    let jobPath = '';
-    if( job_name == 'checkbox.io' )
-    {
-        jobPath = '/bakerx/cm/jobs/pipeline.yml';
-
-        // replace job_name in the pipeline.yml file
-        let result = sshSync(`ansible-playbook /bakerx/cm/jenkinsfile_playbook.yml --extra-vars "job_name=${job_name}"`, 'vagrant@192.168.33.20');
-        if( result.error ) { process.exit( result.status ); }
-    }
-    else if( job_name == 'iTrust' )
-    {
-        jobPath = '/bakerx/cm/jobs/iTrust-pipeline-2.yml';
-    }
-
-    console.log(chalk.blueBright('Creating jenkins job ...'));
-    result = sshSync(`jenkins-jobs --conf /etc/jenkins_jobs.ini --user ${user} --password ${password} update ${jobPath}`, 'vagrant@192.168.33.20');
-    if( result.error ) { process.exit( result.status ); }
-
     console.log('Triggering build.')
     let buildId = await triggerBuild(`${job_name}`).catch( e => console.log(e));
 
@@ -130,4 +110,3 @@ async function run(job_name, user, password) {
       console.log('--- end of pipeline execution ---');
     });
 }
-
