@@ -1,16 +1,63 @@
 # DEVOPS-17 Project
+
+## Table of Contents
+- [Milestone 2](#milestone-2)
+  * [Project Driver](#project-driver)
+    + [Configure Jenkins and build environment-M2](#configure-jenkins-and-build-environment-m2)
+    + [Trigger a build job-M2](#trigger-a-build-job-m2)
+    + [Implement a test suite analysis for detecting useful tests-M2](#implement-a-test-suite-analysis-for-detecting-useful-tests-m2)
+  * [Experiences and learnings about system setup-M2](#experiences-and-learnings-about-system-setup-m2)
+  * [Issues Faced-M2](#issues-faced-m2)
+  * [Screencast-M2](#screencast-m2)
+  * [Checkpoint Progress Report-M2](#checkpoint-progress-report-m2)
+- [Milestone 1](#milestone-1)
+  * [Project Setup](#project-setup)
+  * [Project Implementation](#project-implementation)
+    + [Configure Jenkins and build environment](#configure-jenkins-and-build-environment)
+    + [Trigger a build job](#trigger-a-build-job)
+  * [Experiences and learnings about system setup](#experiences-and-learnings-about-system-setup)
+  * [Issues Faced](#issues-faced)
+  * [Screencast](#screencast)
+  * [Checkpoint Progress Report](#checkpoint-progress-report)
+
 ## Milestone 2
 
+### Project Driver
+#### Configure Jenkins and build environment-M2
+`pipeline setup --gh-user <username> --gh-pass <password> -u <jenkins_username> -p <jenkins_password>`
 
-### Experiences and learnings about system setup
+This command performs the following actions:
+* Creates a new VM with static IP `192.168.33.20` and mounts the present working directory (`pwd`) onto `/bakerx` volume. 
+* Configures the CLI arguments of github username and password as environment variables on the VM.
+* Installs ansible server and Jenkins on the VM.
+* Installs MongoDB, creates `MongoDB` user and installs `nodejs` required to run `checkbox.io` app.
+* Installs Maven, MySQL and its dependencies, copy the root credentials file, installs chrome and chromedriver on the VM to run `iTrust2-v8` application.
+* Sets up git credentials in Jenkins Credentials Manager.
+* Creates `checkbox.io` and `iTrust` build jobs on Jenkins.
+
+#### Trigger a build job-M2
+`pipeline build <iTrust | checkbox.io> -u <jenkins_username> -p <jenkins_password>`
+
+> -u and -p are optional parameters which default to `admin` and `admin`.
+
+This command triggers the already created build job on Jenkins for `checkbox.io` and `iTrust`. The build job yml files can be seen [here](cm/jobs/).
+
+#### Implement a test suite analysis for detecting useful tests-M2
+`pipeline useful-tests -c 1000 --gh-user <username> --gh-pass <password>`
+
+> -c is an optional parameter which defaults to 1000.
+
+This command implements a testsuite analysis and a fuzzer which introduces changes in the code and the mutation coverage is calculated.
+
+### Experiences and learnings about system setup-M2
 
 * Using mutations to randomly modify code helped us learn how to expose potential faults in the codebase. We learned the impact of the quality of mutations applied. If not done intelligently, the code might result in compile failures preventing us from scrutinizing the scripts for faults. Jacoco plugin provides code coverage metrics for Java code via integration with Jacoco. The JaCoCo Maven plug-in provides the JaCoCo runtime agent to your tests and allows basic report creation.
 
-* Setting up an external application is tough if the documentation is incomplete. Fortunately, for the iTrust application, the instructions to run the application were provided properly however the services or applications that needed to be setup wasn't specified properly. We don't think it is a bad thing but it led to a lot of headache when the packages and services we installed didn't actually integrate well with iTrust and we had to make changes. 
+* Setting up an external application is tough if the documentation is incomplete. Fortunately, for the iTrust application, the instructions to run the application were provided properly however the services or applications that needed to be setup wasn't specified properly. We don't think it is a bad thing but it led to a lot of headache when the packages and services we installed didn't actually integrate well with iTrust and we had to try out different configuration change s make changes repeatedly. 
 
-* Static analysis phase is important as it highlights important code smells. The metrics we recorded such as LOC of a function, nesting depth and max chains highlight important and potential issues in the code. A long method would probably be hard to understand for other people or the max chains highlights the need to follow the Law of Demeter principle.
+* Static analysis phase is important as it highlights important code smells. The metrics we recorded such as LOC of a function, nesting depth and max chains highlight important and potential issues in the code. A long method would probably be hard to understand for other people or a high max chain count highlights the violation to software engineering principles such as Law of Demeter.
 
-### Issues Faced
+### Issues Faced-M2
 
 * The tasks were computationally quite expensive. Our machines did not have enough resources to smoothly run all the tasks. Test prioritization for doing 1000 test runs was compute intensive. Running `useful-tests` for a large number of iterations took too long. Due to this, debugging and updating parameters for this task consumed a lot of time.
 
@@ -20,25 +67,18 @@
 
 * Another issue we faced was getting the jacoco and checkstyle plugin to work. At first, we were confused whether we were supposed to change the pom.xml file. On diving deep into the pom.xml file, we saw that jacoco and checkstyle plugins were already installed and configured in the application. We understood that we had to install jenkins plugins that would be able to parse the reports generated. It was tough finding any documentation for jacoco plugin configuration in iTrust-pipeline.yml. A Stack Overflow answer helped us as has helped us countless times before. The configuration of these plugins taught us a lot and also showed us that sometimes, documentation would not be exact and we would need to figure out some moving parts by ourselves.
 
-### Screencast
+### Screencast-M2
 
-[pipeline useful-tests](https://drive.google.com/file/d/1XkTwJWyAL1RQ9-0D7f-vE9E10ERmrVn-/view?usp=sharing)
+* [pipeline setup]()
+* [pipeline build iTrust](https://drive.google.com/file/d/1z1gFPoDicg-CGyE_uaA3SeNsOwYQI71s/view?usp=sharing)
+* [pipeline useful-tests](https://drive.google.com/file/d/1XkTwJWyAL1RQ9-0D7f-vE9E10ERmrVn-/view?usp=sharing)
+* [pipeline build checkbox.io](https://drive.google.com/file/d/1eLS5qk2aWlqgbr45u1FYAlputlsYREL9/view?usp=sharing)
 
-### Checkpoint Progress Report
+### Checkpoint Progress Report-M2
 
 Here's the link to the [CHECKPOINT-M2.md](CHECKPOINT-M2.md).
 
 ## Milestone 1
-
-### Table of Contents
-+ [Project Setup](#project-setup)
-+ [Project Implementation](#project-implementation)
-  - [Configure Jenkins and build environment](#configure-jenkins-and-build-environment)
-  - [Trigger a build job](#trigger-a-build-job)
-+ [Experiences and learnings about system setup](#experiences-and-learnings-about-system-setup)
-+ [Issues Faced](#issues-faced)
-+ [Screencast](#screencast)
-+ [Checkpoint Progress Report](#checkpoint-progress-report)
 
 ### Project Setup
 1. Clone the project.
