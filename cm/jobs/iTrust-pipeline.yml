@@ -27,10 +27,10 @@
                     steps {
                         step([$class: 'JacocoPublisher',
                               execPattern: '**/*.exec',
-                              minimumInstructionCoverage: '70',
-                              maximumInstructionCoverage: '80',
+                              minimumInstructionCoverage: '30',
+                              maximumInstructionCoverage: '60',
                               minimumBranchCoverage: '30',
-                              maximumBranchCoverage: '50',
+                              maximumBranchCoverage: '40',
                               minimumComplexityCoverage: '30',
                               maximumComplexityCoverage: '50',
                               minimumLineCoverage: '30',
@@ -39,6 +39,7 @@
                               maximumMethodCoverage: '60',
                               minimumClassCoverage: '70',
                               maximumClassCoverage: '90',
+                              changeBuildStatus: true
                             ])
                     }
                 }

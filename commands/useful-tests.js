@@ -68,25 +68,4 @@ async function run(privateKey, n_iterations, gh_user, gh_pass) {
     result = sshSync(`/bakerx/testanalysis/scripts/mutate_setup.sh ${n_iterations}`, 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
-
-    // // code to run test prioritization analysis and internally invoke fuzzer
-    // console.log(chalk.greenBright('Cloning iTrust..'));
-    // let itrust = 'https://'+ gh_user + ':' + gh_pass +'@github.ncsu.edu/engr-csc326-staff/iTrust2-v8.git'
-    // // result = sshSync(`git clone -b main ${itrust} /home/vagrant/`, 'vagrant@192.168.33.20');
-    // result = sshSync(`cd /home/vagrant/ && git clone -b main ${itrust} `, 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    // console.log(chalk.greenBright('Installing fuzzer node modules...'));
-    // result = sshSync('cd /bakerx/testanalysis/fuzzer && npm install', 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    // result = sshSync('cp /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml.template /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml', 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    // result = sshSync('. /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" /home/vagrant/iTrust2-v8/iTrust2/src/main/resources/application.yml', 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    // result = sshSync(`cd /bakerx/testanalysis/fuzzer && node index.js ${n_iterations}`, 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
 }

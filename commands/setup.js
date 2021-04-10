@@ -88,11 +88,6 @@ async function run(privateKey, gh_user, gh_pass, user, password) {
     result = sshSync(`jenkins-jobs --conf /etc/jenkins_jobs.ini --user ${user} --password ${password} update ${jobPath}`, 'vagrant@192.168.33.20');
     if( result.error ) { process.exit( result.status ); }
 
-    // replace job_name in the pipeline.yml file
-    // let result = sshSync(`ansible-playbook /bakerx/cm/jenkinsfile_playbook.yml --extra-vars "job_name=${job_name}"`, 'vagrant@192.168.33.20');
-    // if( result.error ) { process.exit( result.status ); }
-    // }
-
     console.log(chalk.blueBright('Creating iTrust build job in Jenkins ...'));
     jobPath = '/bakerx/cm/jobs/iTrust-pipeline.yml';
     result = sshSync(`jenkins-jobs --conf /etc/jenkins_jobs.ini --user ${user} --password ${password} update ${jobPath}`, 'vagrant@192.168.33.20');
