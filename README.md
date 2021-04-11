@@ -23,6 +23,8 @@
 ## Milestone 2
 
 ### Project Driver
+Here's the link to the [1000testslog.txt](1000testslog.txt).
+
 #### Configure Jenkins and build environment-M2
 `pipeline setup --gh-user <username> --gh-pass <password> -u <jenkins_username> -p <jenkins_password>`
 
