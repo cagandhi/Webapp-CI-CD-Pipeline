@@ -59,6 +59,14 @@ async function run(privateKey, gh_user, gh_pass, user, password) {
     let result = child.spawnSync(`bakerx`, `run config-srv focal --ip 192.168.33.20 --sync --memory 4096`.split(' '), {shell:true, stdio: 'inherit'} );
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
+    console.log(chalk.blueBright('Running init script...'));
+    result = sshSync('/bakerx/cm/server-init.sh', 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+    console.log(chalk.blueBright('Setting up the Jenkins server and build environment ...'));
+    result = sshSync('/bakerx/cm/run-ansible.sh /bakerx/cm/playbook.yml /bakerx/cm/inventory.ini /bakerx/.vault-pass', 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
     // if either of gh_user and gh_pass value is undefined but not both
     if(gh_user || gh_pass) {
 
@@ -67,6 +75,11 @@ async function run(privateKey, gh_user, gh_pass, user, password) {
             console.log(chalk.blueBright('Storing git credentials ...'));
             result = sshSync(`/bakerx/cm/add-git-cred.sh ${gh_user} ${gh_pass}`, 'vagrant@192.168.33.20');
             if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+            // run the git cred playbook yml file
+            console.log(chalk.blueBright('Setting up git credentials in Jenkins credentials manager ...'));
+            result = sshSync('/bakerx/cm/run-ansible.sh /bakerx/cm/gitcred_playbook.yml /bakerx/cm/inventory.ini /bakerx/.vault-pass', 'vagrant@192.168.33.20');
+            if( result.error ) { console.log(result.error); process.exit( result.status ); }
         }
         // if one of gh_user or gh_pass is passed but not both in the setup command, display error and exit
         else {
@@ -74,14 +87,6 @@ async function run(privateKey, gh_user, gh_pass, user, password) {
             process.exit(1);
         }
     }
-
-    console.log(chalk.blueBright('Running init script...'));
-    result = sshSync('/bakerx/cm/server-init.sh', 'vagrant@192.168.33.20');
-    if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    console.log(chalk.blueBright('Setting up the Jenkins server and build environment ...'));
-    result = sshSync('/bakerx/cm/run-ansible.sh /bakerx/cm/playbook.yml /bakerx/cm/inventory.ini /bakerx/.vault-pass', 'vagrant@192.168.33.20');
-    if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
     console.log(chalk.blueBright('Creating checkbox.io build job in Jenkins ...'));
     let jobPath = '/bakerx/cm/jobs/pipeline.yml';

@@ -71,9 +71,9 @@ This command implements a testsuite analysis and a fuzzer which introduces chang
 
 ### Screencast-M2
 
-* [pipeline setup]()
+* [pipeline setup](https://drive.google.com/file/d/1uZIexdnAJmoxAB8U7NS6YIvsAOAMrvb3/view?usp=sharing)
 * [pipeline build iTrust](https://drive.google.com/file/d/1z1gFPoDicg-CGyE_uaA3SeNsOwYQI71s/view?usp=sharing)
-* [pipeline useful-tests](https://drive.google.com/file/d/1XkTwJWyAL1RQ9-0D7f-vE9E10ERmrVn-/view?usp=sharing)
+* [pipeline useful-tests](https://drive.google.com/file/d/1fK4Q25w_Nz0c3lu5I2mKQZjN3CX204LU/view?usp=sharing)
 * [pipeline build checkbox.io](https://drive.google.com/file/d/1eLS5qk2aWlqgbr45u1FYAlputlsYREL9/view?usp=sharing)
 
 ### Checkpoint Progress Report-M2
