@@ -1,0 +1,9 @@
+---
+- name: "Add public ssh key to digitalocean account"
+  digital_ocean_sshkey:
+    name: "M3-DO-SSH-KEY"
+    oauth_token: "{{ DO_TOKEN }}"
+    ssh_pub_key: "{{ lookup('file', '/bakerx/provision/digitalocean.pub') }}"
+    state: present
+  register: sshkey_result
+  become: yes

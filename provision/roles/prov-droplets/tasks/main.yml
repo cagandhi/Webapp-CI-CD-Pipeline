@@ -1,0 +1,63 @@
+---
+- name: Create a new droplet for checkbox.io
+  digital_ocean_droplet:
+    name: checkbox
+    oauth_token: "{{ DO_TOKEN }}"
+    size: "{{ DROPLET_SIZE }}" 
+    region: "{{ DROPLET_REGION }}" 
+    image: "{{ DROPLET_IMAGE }}" 
+    wait_timeout: 500
+    unique_name: yes
+    ssh_keys: ["{{ sshkey_result.data.ssh_key.id }}"]
+    state: present
+  register: checkbox_droplet
+
+- name: Create a new droplet for itrust
+  digital_ocean_droplet:
+    name: itrust
+    oauth_token: "{{ DO_TOKEN }}"
+    size: "{{ DROPLET_SIZE }}" 
+    region: "{{ DROPLET_REGION }}" 
+    image: "{{ DROPLET_IMAGE }}" 
+    wait_timeout: 500
+    unique_name: yes
+    ssh_keys: ["{{ sshkey_result.data.ssh_key.id }}"]
+    state: present
+  register: itrust_droplet
+
+- name: Create a new droplet for monitor
+  digital_ocean_droplet:
+    name: monitor
+    oauth_token: "{{ DO_TOKEN }}"
+    size: "{{ DROPLET_SIZE }}" 
+    region: "{{ DROPLET_REGION }}" 
+    image: "{{ DROPLET_IMAGE }}" 
+    wait_timeout: 500
+    unique_name: yes
+    ssh_keys: ["{{ sshkey_result.data.ssh_key.id }}"]
+    state: present
+  register: monitor_droplet
+
+# - name: Save ip and hostname to local hosts file /etc/hosts
+#   lineinfile:
+#     path: /etc/hosts
+#     regexp: '.*{{ item.data.droplet.name }}$'
+#     line: "{{ item.data.ip_address }}  {{ item.data.droplet.name }}"
+#   loop:
+#     - checkbox_droplet
+#     - itrust_droplet
+#     - monitor_droplet
+#   become: yes
+
+- name: Copy the template inventory and replace IP values
+  template:
+    src: inventory.ini.j2
+    dest: /bakerx/provision/inventory.ini
+  become: yes
+
+# - debug:
+#     msg: "ID is {{ checkbox_droplet.data.droplet.name }}, IP is {{ checkbox_droplet.data.ip_address }}"
+# - debug:
+#     msg: "ID is {{ itrust_droplet.data.droplet.name }}, IP is {{ itrust_droplet.data.ip_address }}"
+# - debug:
+#     msg: "ID is {{ monitor_droplet.data.droplet.name }}, IP is {{ monitor_droplet.data.ip_address }}"
