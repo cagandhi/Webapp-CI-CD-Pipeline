@@ -1,3 +1,6 @@
+# ignore private public key files
+**/digitalocean*
+
 # ignore mutations directory
 **/.mutations
 

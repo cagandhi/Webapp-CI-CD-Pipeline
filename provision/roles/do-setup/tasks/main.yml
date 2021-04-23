@@ -1,9 +1,13 @@
 ---
+- name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+  community.crypto.openssh_keypair:
+    path: "{{ SSH_KEY_PATH }}"
+
 - name: "Add public ssh key to digitalocean account"
   digital_ocean_sshkey:
     name: "M3-DO-SSH-KEY"
     oauth_token: "{{ DO_TOKEN }}"
-    ssh_pub_key: "{{ lookup('file', '/bakerx/provision/digitalocean.pub') }}"
+    ssh_pub_key: "{{ lookup('file', '{{ SSH_KEY_PATH }}.pub') }}"
     state: present
   register: sshkey_result
   become: yes
