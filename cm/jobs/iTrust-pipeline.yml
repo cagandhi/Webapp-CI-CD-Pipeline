@@ -14,34 +14,40 @@
                     steps{
                         sh "cp iTrust2/src/main/resources/application.yml.template iTrust2/src/main/resources/application.yml"
                         sh '. /etc/environment && sed -i "s/^    password:.*$/    password: $MYSQL_ROOT_PASSWORD/g" iTrust2/src/main/resources/application.yml'
+                        sh "sudo chmod 755 /etc/my.cnf"
                     }
                 }
                 stage('Build and Test - Run unit and integration tests') {
-                    steps {
-                        sh "cd iTrust2/ && sudo mvn clean test integration-test checkstyle:checkstyle"
-                        recordIssues tool: java(pattern: '**/checkstyle-result.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-                    }
+                  steps {
+                      sh "cd iTrust2/ && sudo mvn clean test integration-test checkstyle:checkstyle"
+                      recordIssues tool: java(pattern: '**/checkstyle-result.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                  }
                 }
                 stage('Publish Test Coverage Report')
                 {
-                    steps {
-                        step([$class: 'JacocoPublisher',
-                              execPattern: '**/*.exec',
-                              minimumInstructionCoverage: '30',
-                              maximumInstructionCoverage: '60',
-                              minimumBranchCoverage: '30',
-                              maximumBranchCoverage: '40',
-                              minimumComplexityCoverage: '30',
-                              maximumComplexityCoverage: '50',
-                              minimumLineCoverage: '30',
-                              maximumLineCoverage: '60',
-                              minimumMethodCoverage: '30',
-                              maximumMethodCoverage: '60',
-                              minimumClassCoverage: '70',
-                              maximumClassCoverage: '90',
-                              changeBuildStatus: true
-                            ])
+                  steps {
+                      step([$class: 'JacocoPublisher',
+                            execPattern: '**/*.exec',
+                            minimumInstructionCoverage: '30',
+                            maximumInstructionCoverage: '60',
+                            minimumBranchCoverage: '30',
+                            maximumBranchCoverage: '40',
+                            minimumComplexityCoverage: '30',
+                            maximumComplexityCoverage: '50',
+                            minimumLineCoverage: '30',
+                            maximumLineCoverage: '60',
+                            minimumMethodCoverage: '30',
+                            maximumMethodCoverage: '60',
+                            minimumClassCoverage: '70',
+                            maximumClassCoverage: '90',
+                            changeBuildStatus: true
+                          ])
                     }
+                }
+                stage('Create war file for deployment') {
+                  steps {
+                    sh "cd iTrust2/ && sudo mvn compile war:war"
+                  }
                 }
             }
             post{
