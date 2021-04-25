@@ -1,0 +1,14 @@
+---
+- name: Download tomcat server packages
+  get_url:
+    url: https://apache.claz.org/tomcat/tomcat-9/v9.0.45/bin/apache-tomcat-9.0.45.tar.gz
+    dest: /usr/local
+
+- name: Extract tomcat packages
+  unarchive:
+    src: /usr/local/apache-tomcat-9.0.45.tar.gz
+    dest: /usr/local
+    remote_src: yes
+
+- name: Start tomcat services
+  shell: nohup /usr/local/apache-tomcat-9.0.45/bin/startup.sh

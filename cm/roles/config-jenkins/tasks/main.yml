@@ -88,3 +88,21 @@
   get_url:
     url: http://localhost:9000/jnlpJars/jenkins-cli.jar
     dest: /home/vagrant/jenkins-cli.jar
+
+- name: Copy jenkins_jobs.ini to /etc on the VM
+  copy:
+    src: /bakerx/cm/jobs/jenkins_jobs.ini
+    dest: /etc/
+  become: yes
+
+- name: Copy .vault-pass from current directory to the VM home directory
+  copy:
+    src: /bakerx/.vault-pass
+    dest: "~/"
+    mode: 0400
+
+- name: "Add jenkins user to /etc/sudoers file"
+  lineinfile:
+    path: /etc/sudoers
+    line: jenkins ALL=(ALL) NOPASSWD:ALL
+  become: yes
