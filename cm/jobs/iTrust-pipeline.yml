@@ -46,7 +46,7 @@
                 }
                 stage('Create war file for deployment') {
                   steps {
-                    sh "cd iTrust2/ && sudo mvn compile war:war"
+                    sh "cd iTrust2/ && sudo mvn package"
                   }
                 }
             }
