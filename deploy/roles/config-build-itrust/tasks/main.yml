@@ -67,7 +67,6 @@
     dest: "{{ item }}"
     mode: 0755
   with_items:
-    - '/home/vagrant/.my.cnf'
     - '/root/.my.cnf'
     - '/etc/my.cnf'
   become: yes

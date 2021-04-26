@@ -4,11 +4,47 @@
     url: https://apache.claz.org/tomcat/tomcat-9/v9.0.45/bin/apache-tomcat-9.0.45.tar.gz
     dest: /usr/local
 
+- name: Create a directory if it does not exist
+  file:
+    path: /etc/tomcat
+    state: directory
+
 - name: Extract tomcat packages
   unarchive:
     src: /usr/local/apache-tomcat-9.0.45.tar.gz
-    dest: /usr/local
+    dest: /etc/tomcat
     remote_src: yes
 
-- name: Start tomcat services
-  shell: nohup /usr/local/apache-tomcat-9.0.45/bin/startup.sh
+# - name: Copy tomcat.service file to remote so we can use tomcat as a service
+#   copy:
+#     src: ../templates/tomcat.service
+#     dest: /etc/systemd/system
+#     remote_src: no
+
+# - name: Just force systemd to reread configs (2.4 and above)
+#   systemd:
+#     daemon_reload: yes
+
+- name: Copy war file to tomcat directory
+  copy:
+    src: /var/lib/jenkins/workspace/iTrust/iTrust2/target/iTrust2-0.0.1-SNAPSHOT.war
+    dest: /etc/tomcat/apache-tomcat-9.0.45/webapps/
+    remote_src: no
+
+# - name: Ensure tomcat service is restarted and enabled on boot
+#   service:
+#     name: tomcat
+#     state: restarted
+#     enabled: yes
+
+- name: Remove AprLifecycleListener line from server.xml
+  lineinfile:
+    path: /etc/tomcat/apache-tomcat-9.0.45/conf/server.xml
+    state: absent
+    regexp: '^.*<Listener className="org\.apache\.catalina\.core\.AprLifecycleListener" SSLEngine="on" \/>$'
+
+- name: Stop tomcat service
+  shell: nohup /etc/tomcat/apache-tomcat-9.0.45/bin/shutdown.sh
+
+- name: Start tomcat service
+  shell: nohup /etc/tomcat/apache-tomcat-9.0.45/bin/startup.sh
