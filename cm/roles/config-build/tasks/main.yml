@@ -1,15 +1,4 @@
 ---
-- name: Copy jenkins_jobs.ini to /etc on the VM
-  copy:
-    src: /bakerx/cm/jobs/jenkins_jobs.ini
-    dest: /etc/
-  become: yes
-
-- name: Copy .vault-pass from current directory to the VM home directory
-  copy:
-    src: /bakerx/.vault-pass
-    dest: "~/"
-    mode: 0400
 
 - name: Add mongo env variables to /etc/environment
   lineinfile:
@@ -40,22 +29,9 @@
 #     state: restarted
 #   become: yes
 
-- name: Install pip
-  apt:
-    name: python3-pip
-    state: latest
-    update_cache: yes
-  become: true
-
 - name: "Install pymongo"
   pip:
     name: pymongo
-    state: latest
-  become: true
-
-- name: "Install jenkins-job-builder"
-  pip:
-    name: jenkins-job-builder
     state: latest
   become: true
 
@@ -88,9 +64,3 @@
     state: latest
     install_recommends: yes
   become: true
-
-- name: "Add jenkins user to /etc/sudoers file"
-  lineinfile:
-    path: /etc/sudoers
-    line: jenkins ALL=(ALL) NOPASSWD:ALL
-  become: yes

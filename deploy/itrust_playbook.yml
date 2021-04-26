@@ -1,0 +1,7 @@
+- hosts: itrust
+  become: yes
+  gather_facts: no
+  roles:
+    - install-pip-job-builder
+    - config-build-itrust
+    - itrust-prod

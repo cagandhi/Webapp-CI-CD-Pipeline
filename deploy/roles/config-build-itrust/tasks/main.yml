@@ -67,7 +67,6 @@
     dest: "{{ item }}"
     mode: 0755
   with_items:
-    - '/home/vagrant/.my.cnf'
     - '/root/.my.cnf'
     - '/etc/my.cnf'
   become: yes
@@ -110,24 +109,24 @@
 - name: Download google chrome deb file
   get_url:
     url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    dest: /home/vagrant/
+    dest: /root/
   become: yes
 
 - name: Install google chrome
   shell:
     cmd: gdebi --n google-chrome-stable_current_amd64.deb
-    chdir: /home/vagrant/
+    chdir: /root/
   become: yes
 
 - name: Download chromedriver zip file
   get_url:
     url: https://chromedriver.storage.googleapis.com/90.0.4430.24/chromedriver_linux64.zip
-    dest: /home/vagrant/
+    dest: /root/
   become: yes
 
 - name: Unarchive chromedriver zip file
   unarchive:
-    src: /home/vagrant/chromedriver_linux64.zip
-    dest: /home/vagrant/
+    src: /root/chromedriver_linux64.zip
+    dest: /root/
     remote_src: yes
   become: yes

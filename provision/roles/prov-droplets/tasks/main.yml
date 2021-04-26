@@ -52,7 +52,7 @@
 - name: Copy the template inventory and replace IP values
   template:
     src: inventory.ini.j2
-    dest: /bakerx/provision/inventory.ini
+    dest: /bakerx/deploy/inventory.ini
   become: yes
 
 # - debug:

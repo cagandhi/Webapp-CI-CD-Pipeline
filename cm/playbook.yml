@@ -7,5 +7,6 @@
   roles:
     - install-jenkins
     - config-jenkins
+    - install-pip-job-builder
     - config-build
     - config-build-itrust
