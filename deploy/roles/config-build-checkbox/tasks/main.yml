@@ -1,0 +1,66 @@
+---
+
+- name: Add mongo env variables to /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    line: "{{ item.split(': ')[0] }}={{ item.split(': ')[1] }}"
+  loop: "{{ lookup('file', '../vars/main.yml').splitlines() }}"
+  become: yes
+
+- name: Source environment variables
+  shell: . /etc/environment
+
+- name: Install mongodb
+  apt:
+    name: mongodb
+    state: latest
+    update_cache: yes
+  become: true
+
+# - name: Disable localhost login exception in mongodb
+#   lineinfile:
+#     path: /etc/mongodb.conf
+#     line: setParameter = enableLocalhostAuthBypass=0
+#   become: yes
+
+# - name: Restart mongodb service
+#   service:
+#     name: mongodb
+#     state: restarted
+#   become: yes
+
+- name: "Install pymongo"
+  pip:
+    name: pymongo
+    state: latest
+  become: true
+
+- name: Create mongo user with password and readWrite role
+  mongodb_user:
+    database: "{{ MONGO_DB }}"
+    name: "{{ MONGO_USER }}"
+    password: "{{ MONGO_PASSWORD }}"
+    roles: readWrite
+    state: present
+  become: true
+
+- name: "Add nodejs apt key"
+  apt_key:
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    state: present
+  become: true
+
+- name: "Add nodejs 14.x ppa for apt repo"
+  apt_repository:
+    repo: deb https://deb.nodesource.com/node_14.x focal main
+    update_cache: yes
+    state: present
+  become: true
+
+- name: "Install nodejs"
+  apt:
+    update_cache: yes
+    name: nodejs
+    state: latest
+    install_recommends: yes
+  become: true
