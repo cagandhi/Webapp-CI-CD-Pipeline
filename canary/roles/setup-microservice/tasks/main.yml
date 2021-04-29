@@ -1,0 +1,30 @@
+---
+# - debug:
+#     msg: "{{ inventory_hostname }} is my VM for execution"
+
+- name: Git clone miroservice preview repo, master branch (blue)
+  ansible.builtin.git:
+    repo: 'https://github.com/chrisparnin/checkbox.io-micro-preview.git'
+    dest: /home/vagrant/
+    version: master
+  when: inventory_hostname == "blue"
+
+- name: Git clone miroservice preview repo, broken branch (green)
+  ansible.builtin.git:
+    repo: 'https://github.com/chrisparnin/checkbox.io-micro-preview.git'
+    dest: /home/vagrant/
+    version: broken
+  when: inventory_hostname == "green"
+
+- name: Install npm packages
+  npm:
+    path: /home/vagrant/checkbox.io-micro-preview
+
+- name: Delete micro checkbox service using pm2
+  shell: pm2 delete micro
+  ignore_errors: yes
+
+- name: Start micro checkbox service using pm2
+  shell: 
+    cmd: pm2 start index.js --name micro
+    chdir: /home/vagrant/checkbox.io-micro-preview/

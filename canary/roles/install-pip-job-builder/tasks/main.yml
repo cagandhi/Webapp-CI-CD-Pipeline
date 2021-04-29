@@ -1,0 +1,18 @@
+- name: Install pip
+  apt:
+    name: python3-pip
+    state: latest
+    update_cache: yes
+  become: true
+
+- name: "Install jenkins-job-builder"
+  pip:
+    name: jenkins-job-builder
+    state: latest
+  become: true
+
+- name: Install OpenJDK 11 using apt
+  apt:
+    name: openjdk-11-jdk
+    state: latest
+  become: true
