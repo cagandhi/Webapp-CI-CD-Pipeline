@@ -5,15 +5,15 @@
 - name: Git clone miroservice preview repo, master branch (blue)
   ansible.builtin.git:
     repo: 'https://github.com/chrisparnin/checkbox.io-micro-preview.git'
-    dest: /home/vagrant/
-    version: master
+    dest: /home/vagrant/checkbox.io-micro-preview/
+    version: "{{ blueBranch }}"
   when: inventory_hostname == "blue"
 
 - name: Git clone miroservice preview repo, broken branch (green)
   ansible.builtin.git:
     repo: 'https://github.com/chrisparnin/checkbox.io-micro-preview.git'
-    dest: /home/vagrant/
-    version: broken
+    dest: /home/vagrant/checkbox.io-micro-preview/
+    version: "{{ greenBranch }}"
   when: inventory_hostname == "green"
 
 - name: Install npm packages

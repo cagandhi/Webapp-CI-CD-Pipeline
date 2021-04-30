@@ -1,0 +1,32 @@
+---
+
+- name: Create agent folder in VM home target
+  file:
+    path: /home/vagrant/agent/
+    state: directory
+    mode: '0755'
+
+- name: Copy agent index.js to agent directory on the blue green VMs
+  template:
+    src: index.js.j2
+    dest: /home/vagrant/agent/index.js
+    force: yes
+
+- name: Copy agent package.json to agent directory on the blue green VMs
+  template:
+    src: package.json
+    dest: /home/vagrant/agent/package.json
+    force: yes
+
+- name: Install npm packages
+  npm:
+    path: /home/vagrant/agent/
+
+- name: Delete agent health service using pm2
+  shell: pm2 delete agentHealth
+  ignore_errors: yes
+
+- name: Start agent health service using pm2
+  shell: 
+    cmd: pm2 start index.js --name agentHealth
+    chdir: /home/vagrant/agent/
