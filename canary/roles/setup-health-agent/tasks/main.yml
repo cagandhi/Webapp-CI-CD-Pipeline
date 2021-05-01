@@ -23,10 +23,17 @@
     path: /home/vagrant/agent/
 
 - name: Delete agent health service using pm2
-  shell: pm2 delete agentHealth
+  shell: pm2 stop agentHealth
   ignore_errors: yes
 
-- name: Start agent health service using pm2
+- name: Start agent health service using pm2 (blue)
   shell: 
-    cmd: pm2 start index.js --name agentHealth
+    cmd: pm2 start index.js blue --name agentHealth
     chdir: /home/vagrant/agent/
+  when: inventory_hostname == "blue"
+
+- name: Start agent health service using pm2 (green)
+  shell: 
+    cmd: pm2 start index.js green --name agentHealth
+    chdir: /home/vagrant/agent/
+  when: inventory_hostname == "green"

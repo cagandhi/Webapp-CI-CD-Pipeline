@@ -18,12 +18,24 @@
     dest: /home/vagrant/server/package.json
     force: yes
 
+- name: Copy survey.json to server on monitor VM
+  template:
+    src: survey.json
+    dest: /home/vagrant/server/survey.json
+    force: yes
+
 - name: Install npm packages
   npm:
     path: /home/vagrant/server/
 
+- name: Install siege via apt
+  apt:
+    name: siege
+    state: latest
+    update_cache: yes
+
 - name: Delete server health service using pm2
-  shell: pm2 delete proxyServer
+  shell: pm2 stop proxyServer
   ignore_errors: yes
 
 - name: Start server health service using pm2
