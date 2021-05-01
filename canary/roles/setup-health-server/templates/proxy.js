@@ -8,20 +8,20 @@ const httpProxy = require('http-proxy');
 
 
 
-const BLUE  = 'http://192.168.44.25:3000';
-const GREEN = 'http://192.168.44.30:3000';
+const BLUE  = 'http://192.168.44.25:3000/preview';
+const GREEN = 'http://192.168.44.30:3000/preview';
 
-const blue_preview=`http://192.168.44.25:3000:(service_port)/preview`;
-const green_preview=`http://192.168.44.30:3000:(service_port)/preview`;
+//const blue_preview=`http://192.168.44.25:3000/preview`;
+//const green_preview=`http://192.168.44.30:3000/preview`;
 
 class Production
 {
     constructor()
     {
-        this.TARGET = GREEN;
-        this.server_id=0;
+        this.TARGET = BLUE;
+        //this.server_id=0;
         setInterval( this.healthCheck.bind(this), 5000 );
-    
+    /*
     //https://stackoverflow.com/questions/6893130/how-to-set-one-minute-counter-in-javascript
     let minutes=1;
 
@@ -39,6 +39,7 @@ class Production
         this.server_id = 0;      
         }, 2*minutes*60*1000);
     }
+    */
     
     // TASK 1:
     proxy()
@@ -57,8 +58,9 @@ class Production
 
    failover()
    {
-      this.TARGET = BLUE;
+      this.TARGET = GREEN;
    }
+   /*
 
    async healthCheck()
    {
@@ -75,6 +77,7 @@ class Production
          console.log(error);
       }
    }
+   */
 
 }
 
@@ -82,8 +85,10 @@ async function run() {
 
     console.log(chalk.keyword('pink')('Starting proxy on localhost:3090'));
     let client = redis.createClient(6379, 'localhost', {});
+    let prod = new Production();
+    prod.proxy();
 
-
+    /*
     var latency = setInterval( function ()
     {
         for( var server of servers )
@@ -110,7 +115,6 @@ async function run() {
             }
         }
     }, 10000);
-    let prod = new Production();
-    prod.proxy();
-
+    */
+    
 }

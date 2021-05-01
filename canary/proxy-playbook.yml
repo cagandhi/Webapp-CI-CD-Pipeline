@@ -3,7 +3,5 @@
   gather_facts: no
   roles:
     - install-pip-job-builder
-    # - config-build-checkbox
     - install-pm2
-    # - setup-microservice
     - setup-health-server

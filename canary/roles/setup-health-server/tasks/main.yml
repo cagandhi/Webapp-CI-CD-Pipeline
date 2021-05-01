@@ -1,0 +1,32 @@
+---
+
+- name: Create server folder in VM home target
+  file:
+    path: /home/vagrant/server/
+    state: directory
+    mode: '0755'
+
+- name: Copy proxy.js to server on monitor VM
+  template:
+    src: proxy.js
+    dest: /home/vagrant/server/proxy.js
+    force: yes
+
+- name: Copy package.json to server on monitor VM
+  template:
+    src: package.json
+    dest: /home/vagrant/server/package.json
+    force: yes
+
+- name: Install npm packages
+  npm:
+    path: /home/vagrant/server/
+
+- name: Delete server health service using pm2
+  shell: pm2 delete proxyServer
+  ignore_errors: yes
+
+- name: Start server health service using pm2
+  shell: 
+    cmd: pm2 start proxy.js --name proxyServer
+    chdir: /home/vagrant/server/
