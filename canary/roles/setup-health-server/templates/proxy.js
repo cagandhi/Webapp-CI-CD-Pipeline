@@ -6,7 +6,7 @@ const got = require('got');
 const http = require('http');
 const httpProxy = require('http-proxy');
 const execSync = require('child_process').execSync;
-
+const fs = require('fs');
 
 const BLUE  = 'http://192.168.44.25:3000/preview';
 const GREEN = 'http://192.168.44.30:3000/preview';
@@ -100,31 +100,57 @@ async function main() {
 
   // send loads to blue and green VMs
   let start_time = (new Date()).getTime()/1000;
-  while(((new Date()).getTime()/1000) - start_time <= 60)
-  {
-    let response = await got.post("https://api.digitalocean.com/v2/droplets", 
-    {
-      headers:headers,
-      json: data
-    }).catch( err => 
-      console.error(chalk.red(`createDroplet: ${err}`)) 
-    );
-  }
+  // const FormData = require('form-data');
 
-  console.log('siege blue');
-  // import { execSync } from 'child_process';  // replace ^ if using ES modules
-  let cmd = "siege -b -t60s --content-type 'application/json' '"+prod.TARGET+" POST < survey.json'";
-  console.log(cmd);
-  let output = execSync(cmd, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'inherit', 'inherit'] });
+  // const form = new FormData();
+  // form.append('data', fs.createReadStream('/home/vagrant/server/survey.json'));
+
+  console.log("prod target is now BLUE :: "+prod.TARGET);
+  let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
+  // console.log(cmd1);
+
+  const load_time = 60;
+  while(((new Date()).getTime()/1000) - start_time <= load_time)
+  {
+
+    await execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+    // let response = await got.post(prod.TARGET, 
+    // {
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: form
+    // }).catch( err => 
+    //   console.error(err)
+    // );
+  }
 
   prod.TARGET = GREEN;
 
-  console.log("prod target changed now :: "+prod.TARGET);
-  console.log('siege green');
+  console.log("prod target is now GREEN :: "+prod.TARGET);
+  cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
 
-  cmd = "siege -b -t60s --content-type 'application/json' '"+prod.TARGET+" POST < survey.json'";
-  console.log(cmd);
-  output = execSync(cmd, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'inherit', 'inherit'] });
+  start_time = (new Date()).getTime()/1000;
+  while(((new Date()).getTime()/1000) - start_time <= load_time)
+  {
+
+    await execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+  }
+
+  // console.log('siege blue');
+  // // import { execSync } from 'child_process';  // replace ^ if using ES modules
+  // let cmd = "siege -b -t60s --content-type 'application/json' '"+prod.TARGET+" POST < survey.json'";
+  // console.log(cmd);
+  // let output = execSync(cmd, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'inherit', 'inherit'] });
+
+  // prod.TARGET = GREEN;
+
+  // console.log("prod target changed now :: "+prod.TARGET);
+  // console.log('siege green');
+
+  // cmd = "siege -b -t60s --content-type 'application/json' '"+prod.TARGET+" POST < survey.json'";
+  // console.log(cmd);
+  // output = execSync(cmd, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'inherit', 'inherit'] });
 
     /*
     var latency = setInterval( function ()
