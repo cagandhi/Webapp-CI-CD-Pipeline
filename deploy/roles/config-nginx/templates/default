@@ -1,6 +1,6 @@
 server {
   listen 80;
-  root /root/checkbox.io/public_html/;
+  root /var/www/checkbox.io/public_html/;
   index index.html index.htm;
 
   location / {
