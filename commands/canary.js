@@ -98,7 +98,7 @@ async function run(blueBranch, greenBranch) {
 
 
 
-    // // 1d. Install checkbox.io microservice dependencies on blue and green VMs, setup health agents and start service
+    // 1d. Install checkbox.io microservice dependencies on blue and green VMs, setup health agents and start service
     // filePath = '/bakerx/canary/bluegreen-playbook.yml';
     // inventoryPath = '/bakerx/canary/inventory.ini';
     // vaultFilePath = '/bakerx/.vault-pass';
