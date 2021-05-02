@@ -23,7 +23,7 @@
     path: /home/vagrant/agent/
 
 - name: Delete agent health service using pm2
-  shell: pm2 delete agentHealth
+  shell: pm2 stop agentHealth
   ignore_errors: yes
 
 - name: Start agent health service using pm2 (blue)

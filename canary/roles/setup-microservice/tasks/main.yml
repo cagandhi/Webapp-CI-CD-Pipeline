@@ -21,7 +21,7 @@
     path: /home/vagrant/checkbox.io-micro-preview
 
 - name: Delete micro checkbox service using pm2
-  shell: pm2 delete micro
+  shell: pm2 stop micro
   ignore_errors: yes
 
 - name: Start micro checkbox service using pm2

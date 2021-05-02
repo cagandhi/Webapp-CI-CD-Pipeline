@@ -39,6 +39,7 @@ async function main(name)
         console.log(e);
         process.exit(1);
     });
+    
     let client = {};
     client.publish = util.promisify(connection.publish).bind(connection);
 
@@ -47,10 +48,12 @@ async function main(name)
     {
         let payload = {
             memoryLoad: agent.memoryLoad(),
-            cpu: await agent.cpu()
+            cpu: await agent.cpu(),
+            timestamp: ((new Date()).getTime()/1000),
         };
         let msg = JSON.stringify(payload);
         await client.publish(name, msg);
+        //await client.lpush(name, msg);
         console.log(`${name} ${msg}`);
     }, 1000);
 

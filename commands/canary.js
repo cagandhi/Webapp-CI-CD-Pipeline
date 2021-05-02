@@ -30,60 +30,22 @@ exports.handler = async argv => {
 async function run(blueBranch, greenBranch) {
 
     
-    
-    // 1a. set up monitor/proxy VM
-    // console.log(chalk.yellow('Pulling queues image from bakerx'));
-    // let result = child.spawnSync(`bakerx`, `pull queues CSC-DevOps/Images#Spring2020`.split(' '), {shell:true, stdio: 'inherit'} );
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    // console.log(chalk.yellow('Provisioning monitoring/proxy server...'));
-    // result = child.spawnSync(`bakerx`, `run monitor queues --ip ${proxyIP} --sync`.split(' '), {shell:true, stdio: 'inherit'} );
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    
-
-
-
-
-
     /*
 
-    // console.log(chalk.blueBright('Creating proxy IP txt file...'));
-    // result = sshSync(`/bakerx/canary/run-ansible-vars.sh ${filePath} ${inventoryPath} ${vaultFilePath} ${extraVar}`, 'vagrant@192.168.33.20');
-    // if( result.error ) { process.exit( result.status ); }
+    // 1a. set up monitor/proxy VM
+    console.log(chalk.yellow('Pulling queues image from bakerx'));
+    let result = child.spawnSync(`bakerx`, `pull queues CSC-DevOps/Images#Spring2020`.split(' '), {shell:true, stdio: 'inherit'} );
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
-    // let ip = getIPAddress();
-    // console.log(chalk.yellow(`Setting host network as ${ip}...`));
-    // fs.writeFileSync("../canary/proxy_ip.txt", ip);
+    console.log(chalk.yellow('Provisioning monitoring/proxy server...'));
+    result = child.spawnSync(`bakerx`, `run monitor1 queues --ip ${proxyIP} --sync`.split(' '), {shell:true, stdio: 'inherit'} );
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
     */
 
 
-    
 
-    // 1b. Set up proxy service on proxy/monitor VM, start health agents on server
-    let filePath = '/bakerx/canary/proxy-playbook.yml';
-    let inventoryPath = '/bakerx/canary/inventory.ini';
-    let vaultFilePath = '/bakerx/.vault-pass';
-
-    console.log(chalk.blueBright('Installing proxy code and health server on proxy/monitor VM...'));
-    result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
-    if( result.error ) { process.exit( result.status ); }
-
-    
-
-    
-
-    // // 1c. set up blue and green VMs
-    // console.log(chalk.yellow('Provisioning blue and green VMs'));
-    // result = child.spawnSync(`bakerx`, `run`.split(' '), {shell:true, stdio: 'inherit'} );
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    
-    
-
-
-    // //  1c a. Copy bakerx private key to vm
+    // //  1a (a) Copy bakerx private key to vm
     // console.log(chalk.yellow('Create .bakerx directory in home'));
     // result = sshSync('mkdir -p /home/vagrant/.bakerx', 'vagrant@192.168.33.20');
     // if( result.error ) { console.log(result.error); process.exit( result.status ); }
@@ -95,39 +57,56 @@ async function run(blueBranch, greenBranch) {
 
 
 
+        
+
+    // 1b. Set up proxy service on proxy/monitor VM, start health agents on server
+    let filePath = '/bakerx/canary/proxy-playbook.yml';
+    let inventoryPath = '/bakerx/canary/inventory.ini';
+    let vaultFilePath = '/bakerx/.vault-pass';
+
+    console.log(chalk.blueBright('Installing proxy code and health server on proxy/monitor VM...'));
+    result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+    
+
+    /*
+
+    // 1c. set up blue and green VMs
+    console.log(chalk.yellow('Provisioning blue and green VMs'));
+    result = child.spawnSync(`bakerx`, `run`.split(' '), {shell:true, stdio: 'inherit'} );
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+
+
 
 
 
     // 1d. Install checkbox.io microservice dependencies on blue and green VMs, setup health agents and start service
-    // filePath = '/bakerx/canary/bluegreen-playbook.yml';
-    // inventoryPath = '/bakerx/canary/inventory.ini';
-    // vaultFilePath = '/bakerx/.vault-pass';
+    filePath = '/bakerx/canary/bluegreen-playbook.yml';
+    inventoryPath = '/bakerx/canary/inventory.ini';
+    vaultFilePath = '/bakerx/.vault-pass';
 
-    // // hardcoded blue and green branch values because as instructed by TA, blue always contains master and green always contains broken
-    // // let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch='+blueBranch+' '+'greenBranch='+greenBranch;
-    // let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch=master'+' '+'greenBranch=broken';
+    // hardcoded blue and green branch values because as instructed by TA, blue always contains master and green always contains broken
+    // let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch='+blueBranch+' '+'greenBranch='+greenBranch;
+    let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch=master'+' '+'greenBranch=broken';
 
-    // console.log(chalk.yellow(`extra var :: ${extraVar}`));
+    console.log(chalk.yellow(`extra var :: ${extraVar}`));
     
-    // console.log(chalk.blueBright('Installing checkbox.io dependencies on blue and green VMs...'));
-    // let runCmd = '/bakerx/canary/run-ansible-vars.sh '+filePath+' '+inventoryPath+' '+vaultFilePath+' "'+extraVar+'"';
-    // console.log(chalk.yellow(`run command :: ${runCmd}`));
-    // result = sshSync(runCmd, 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
+    console.log(chalk.blueBright('Installing checkbox.io dependencies on blue and green VMs...'));
+    let runCmd = '/bakerx/canary/run-ansible-vars.sh '+filePath+' '+inventoryPath+' '+vaultFilePath+' "'+extraVar+'"';
+    console.log(chalk.yellow(`run command :: ${runCmd}`));
+    result = sshSync(runCmd, 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
+    */
+
+    // 1e. Start proxy.js and load generation
+    filePath = '/bakerx/canary/start-proxy-playbook.yml';
+    inventoryPath = '/bakerx/canary/inventory.ini';
+    vaultFilePath = '/bakerx/.vault-pass';
+
+    console.log(chalk.yellow("Starting proxy and load generation..."));
+    result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
 }
-
-function getIPAddress() {
-    var interfaces = require('os').networkInterfaces();
-    for (var devName in interfaces) {
-      var iface = interfaces[devName];
-  
-      for (var i = 0; i < iface.length; i++) {
-        var alias = iface[i];
-        if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal)
-          return alias.address;
-      }
-    }
-  
-    return '0.0.0.0';
-  }

@@ -12,12 +12,13 @@ const fs = require('fs');
 const BLUE  = 'http://192.168.44.25:3000/preview';
 const GREEN = 'http://192.168.44.30:3000/preview';
 
+var blueStart=-1, blueEnd=-1, greenStart=-1, greenEnd=-1;
 
 /// Servers data being monitored.
 var servers =
 [
-  {name: "blue", url:'http://192.168.44.25:3000', status: "#cccccc",  scoreTrend : [0]},
-  {name: "green", url:'http://192.168.44.30:3000/', status: "#cccccc",  scoreTrend : [0]},
+  {name: "blue", url:'http://192.168.44.25:3000', status: "#cccccc",  scoreTrend : [0], cpuList: [], memoryList: [], latencyList: [], statuscodeList: []},
+  {name: "green", url:'http://192.168.44.30:3000', status: "#cccccc",  scoreTrend : [0], cpuList: [], memoryList: [], latencyList: [], statuscodeList: []},
 ];
 
 
@@ -97,12 +98,43 @@ function updateHealth(server)
     }
 }
 
+function saveHealth(server) {
+  let x;
+  if( server.name == "blue" ) {
+    x = servers[0];
+
+    if(blueStart == -1 || blueEnd == -1)
+      console.log(server);
+
+    else if(server.timestamp >= blueStart && server.timestamp <= blueEnd) {
+      x.cpuList.push(server.cpu);
+      x.memoryList.push(server.memoryLoad);
+    }
+
+  }
+  else if( server.name == "green" ) {
+    x = servers[1];
+
+    if(greenStart == -1 || greenEnd == -1)
+      console.log(server);
+
+    else if(server.timestamp >= greenStart && server.timestamp <= greenEnd) {
+      x.cpuList.push(server.cpu);
+      x.memoryList.push(server.memoryLoad);
+    }
+  }
+  console.log(chalk.yellow(`\n${server.name} -- ${server.timestamp}`));
+  console.log(x.cpuList);
+  console.log(x.memoryList);
+  
+}
+
 class Production
 {
     constructor()
     {
         this.TARGET = BLUE;
-        setInterval( this.healthCheck.bind(this), 5000 );
+        // setInterval( this.healthCheck.bind(this), 5000 );
     }
     
     
@@ -118,7 +150,7 @@ class Production
             // callback for redirecting requests.
             proxy.web( req, res, {target: self.TARGET } );
         });
-        server.listen(3091);
+        server.listen(3090);
    }
 
    failover()
@@ -146,16 +178,38 @@ class Production
 
 }
 
-(async () => 
+(() => 
 {
-    // Get agent name from command line.
-    
-    main();
-    start();
+  // Get agent name from command line.
+  
+  console.log("BEFORE MAIN FUNCTION");
+  main();
+  console.log("BEFORE START FUNCTION");
+  start();
+  console.log("BEFORE CONNSOLEFUNC");
+  consoleFunc();
 
 })();
 
-async function start()
+function consoleFunc() {
+  console.log("IN CONNSOLEFUNC");
+  // ////////////////////////////////////////////////////////////////////////////////////////
+  console.log("\n// ////////////////////////////////////////////////////////////////////////////////////////\n");
+  for( var server of servers ) {
+    console.log(chalk.yellow("\nCPU LIST"));
+    console.log(server.cpuList);
+    console.log(chalk.yellow("\nMEMORY LOAD LIST"));
+    console.log(server.memoryList);
+    console.log(chalk.yellow("\nSTATUS CODE LIST"));
+    console.log(server.statuscodeList);
+    console.log(chalk.yellow("\nLATENCY LIST"));
+    console.log(server.latencyList);
+  }
+  console.log("\n// ////////////////////////////////////////////////////////////////////////////////////////\n");
+  // ////////////////////////////////////////////////////////////////////////////////////////
+}
+
+function start()
 {
     console.log("IN START FUNCTION");
     // ////////////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +252,7 @@ async function start()
     // When an agent has published information to a channel, we will receive notification here.
     client.on("message", function (channel, message)
     {
-        console.log(`Received message from agent: ${channel}`)
+        // console.log(`Received message from agent: ${channel}`)
         for( var server of servers )
         {
             // Update our current snapshot for a server's metrics.
@@ -207,7 +261,13 @@ async function start()
                 let payload = JSON.parse(message);
                 server.memoryLoad = payload.memoryLoad;
                 server.cpu = payload.cpu;
-                updateHealth(server);
+                server.timestamp = payload.timestamp;
+                // updateHealth(server);
+
+                // if( server.timestamp > greenEnd )
+                //   client.quit();
+
+                saveHealth(server);
             }
         }
     });
@@ -227,21 +287,29 @@ async function start()
                 // Make request to server we are monitoring.
                 got(server.url, {timeout: 5000, throwHttpErrors: false}).then(function(res)
                 {
-                    // TASK 2
-                    captureServer.statusCode = res.statusCode;
-                    captureServer.latency = Date.now()-now;
+                  // TASK 2
+                  captureServer.statusCode = res.statusCode;
+                  captureServer.latency = Date.now()-now;
                 }).catch( e =>
                 {
-                    // console.log(e);
-                    captureServer.statusCode = e.code;
-                    captureServer.latency = 5000;
+                  // console.log(e);
+                  captureServer.statusCode = e.code;
+                  captureServer.latency = 5000;
+                }).finally( () => 
+                {
+                  let x = servers[server.name == "blue"?0:1];
+                  x.latencyList.push(captureServer.latency);
+                  x.statuscodeList.push(captureServer.statusCode);
                 });
             }
         }
-    }, 10000);
+    }, 5000);
 }
 
-async function main() {
+
+function main() {
+
+  console.log("IN MAIN FUNCTION");
 
   console.log(chalk.keyword('pink')('Starting proxy on localhost:3090'));
 //  let client = redis.createClient(6379, 'localhost', {});
@@ -249,16 +317,18 @@ async function main() {
   prod.proxy();
 
   // send loads to blue and green VMs
-  let start_time = (new Date()).getTime()/1000;
 
   console.log("prod target is now BLUE :: "+prod.TARGET);
   let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
-
   const load_time = 60;
+
+  blueStart = ((new Date()).getTime()/1000);
+
+  let start_time = (new Date()).getTime()/1000;
   while(((new Date()).getTime()/1000) - start_time <= load_time)
   {
 
-    await execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+    execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
     // let response = await got.post(prod.TARGET, 
     // {
     //   headers: {
@@ -270,16 +340,22 @@ async function main() {
     // );
   }
 
+  blueEnd = ((new Date()).getTime()/1000);
+  
   prod.TARGET = GREEN;
 
   console.log("prod target is now GREEN :: "+prod.TARGET);
   cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
 
+  greenStart = ((new Date()).getTime()/1000);
+
   start_time = (new Date()).getTime()/1000;
   while(((new Date()).getTime()/1000) - start_time <= load_time)
   {
-    await execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+    execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
   }
+
+  greenEnd = ((new Date()).getTime()/1000);
 }
 
 

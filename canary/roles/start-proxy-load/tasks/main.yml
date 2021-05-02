@@ -1,0 +1,10 @@
+---
+
+- name: Stop server health service using pm2
+  shell: pm2 stop proxyServer
+  ignore_errors: yes
+
+- name: Start server health service using pm2
+  shell: 
+    cmd: pm2 start proxy.js --name proxyServer
+    chdir: /home/vagrant/server/
