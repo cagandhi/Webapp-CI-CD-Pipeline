@@ -4,4 +4,7 @@
   roles:
     - install-pip-job-builder
     - config-build-checkbox
-    #- checkbox-nginx
+    - install-pm2
+    - setup-checkbox
+    - config-nginx
+
