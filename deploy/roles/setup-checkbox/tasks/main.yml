@@ -1,4 +1,8 @@
 - name: Cloning checkbox.io repository
   git:
     repo: 'https://github.com/chrisparnin/checkbox.io'
-    dest: "/home/{{ ansible_user }}/checkbox.io"
+    dest: "/root/checkbox.io/"
+
+- name: Install npm packages
+  npm:
+    path: /root/checkbox.io/server-side/site/

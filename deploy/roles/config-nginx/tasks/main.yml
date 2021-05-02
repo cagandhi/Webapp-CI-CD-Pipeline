@@ -3,8 +3,33 @@
     name: nginx
     state: latest
 
+- name: Copy default file
+  copy: 
+    src: ../templates/default
+    dest: /etc/nginx/sites-available/default
+
+- name: Copy nginx.conf
+  copy: 
+    src: ../templates/nginx.conf
+    dest: /etc/nginx/
+
+- name: link default file
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
 
 - name: restart nginx
   service:
     name: nginx
-    state: started
+    state: restarted
+    enabled: yes
+
+- name: Delete pm2 process
+  shell: pm2 delete checkbox
+  ignore_errors: yes
+
+- name: Run checkbox.io pm2 process
+  shell: 
+    cmd: . /etc/environment && pm2 start server.js --name checkbox
+    chdir: /root/checkbox.io/server-side/site/
