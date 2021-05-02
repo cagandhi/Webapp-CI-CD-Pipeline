@@ -1,0 +1,10 @@
+- name: Install nginx
+  apt:
+    name: nginx
+    state: latest
+
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: started
