@@ -32,4 +32,4 @@
 - name: Run checkbox.io pm2 process
   shell: 
     cmd: . /etc/environment && pm2 start server.js --name checkbox
-    chdir: /root/checkbox.io/server-side/site/
+    chdir: /var/www/checkbox.io/server-side/site/

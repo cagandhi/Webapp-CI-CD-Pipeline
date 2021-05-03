@@ -2,12 +2,14 @@
   git:
     repo: 'https://github.com/chrisparnin/checkbox.io'
     dest: "/var/www/checkbox.io/"
+    force: yes
 
 - name: Change permissions
   file:
     path: "/var/www/checkbox.io/" # this should be as same as `dest` above
     mode: "u=rwx,g=rwx,o=rwx"
     recurse: yes
+
 - name: Install npm packages
   npm:
-    path: /root/checkbox.io/server-side/site/
+    path: /var/www/checkbox.io/server-side/site/
