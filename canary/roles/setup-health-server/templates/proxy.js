@@ -375,7 +375,7 @@ function main() {
   let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
 
   let cntblue=0, cntgreen=0;
-
+  let surveyJson = JSON.parse(fs.readFileSync('/home/vagrant/server/survey.json'))
   // generate load
   var timerblue = setInterval(function() {
     if(cntblue>maxReqCnt)
@@ -430,20 +430,32 @@ function main() {
 
             latency_status(canary_analysis);
           });
-
         }
-        prod.TARGET=GREEN;
-        // console.log("prod target is now GREEN :: "+prod.TARGET);
-        let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
-        execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+
+        let res = got.post(GREEN, {
+          json: surveyJson,
+          responseType: 'json',
+          throwHttpErrors: false
+        });
+
+        // prod.TARGET=GREEN;
+        // // console.log("prod target is now GREEN :: "+prod.TARGET);
+        // let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
+        // execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
         cntgreen++;
         console.log(chalk.yellow(`GREEN :: ${cntgreen}`));
       }, reqTime);
     }
 
-    // console.log("prod target is now BLUE :: "+prod.TARGET);
-    let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
-    execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+    let res = got.post(BLUE, {
+      json: surveyJson,
+      responseType: 'json',
+      throwHttpErrors: false
+    });
+
+    // // console.log("prod target is now BLUE :: "+prod.TARGET);
+    // let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
+    // execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
     cntblue++;
     console.log(chalk.yellow(`BLUE :: ${cntblue}`));
 
