@@ -2,12 +2,13 @@ const redis = require('redis');
 const chalk = require('chalk');
 const path = require('path');
 const os = require('os');
-const mwu = require('mann-whitney-utest');
+
 const got = require('got');
 const http = require('http');
 const httpProxy = require('http-proxy');
 const execSync = require('child_process').execSync;
 const fs = require('fs');
+
 
 const BLUE  = 'http://192.168.44.25:3000/preview';
 const GREEN = 'http://192.168.44.30:3000/preview';
@@ -21,7 +22,7 @@ let maxLatReqCnt=(60*1000)/latencyTime;
 var blueStart=-1, blueEnd=-1, greenStart=-1, greenEnd=-1;
 
 const statsfilePath = '/home/vagrant/server/stats.json';
-const canaryReportPath = '/home/vagrant/server/canary_report.txt';
+// const statsfilePath = '/bakerx/canary/stats.json';
 
 let obj={};
 
@@ -31,84 +32,6 @@ var servers =
   {name: "blue", url: BLUE, status: "#cccccc",  scoreTrend : [0], cpuList: [], memoryList: [], latencyList: [], statuscodeList: []},
   {name: "green", url: GREEN, status: "#cccccc",  scoreTrend : [0], cpuList: [], memoryList: [], latencyList: [], statuscodeList: []},
 ];
-
-
-// function score2color(score)
-// {
-//   if (score <= 0.25) return "#ff0000";
-//   if (score <= 0.50) return "#ffcc00";
-//   if (score <= 0.75) return "#00cc00";
-//   return "#00ff00";
-// }
-
-// // TASK 3
-// function updateHealth(server)
-// {
-//     // Update score calculation.
-//     let score = 0;
-//     // let scflag, latflag, cpuflag, memflag;
-
-//     // if( server.statusCode == 200 )
-//     //     scflag = 4;
-//     // else
-//     //     scflag = 0;
-
-//     // if( server.latency <= 10 )
-//     //     latflag = 1;
-//     // else if( server.latency <= 8 )
-//     //     latflag = 2;
-//     // else if( server.latency <= 5 )
-//     //     latflag = 3;
-//     // else if( server.latency <= 2 )
-//     //     latflag = 4;
-//     // else
-//     //     latflag = 0;
-
-//     // if( server.cpu <= 70 )
-//     //     cpuflag = 1;
-//     // else if( server.cpu <= 50 )
-//     //     cpuflag = 2;
-//     // else if( server.cpu <= 40 )
-//     //     cpuflag = 3;
-//     // else if( server.cpu <= 20 )
-//     //     cpuflag = 4;
-//     // else
-//     //     cpuflag = 0;
-
-//     // if( server.memoryLoad <= 70 )
-//     //     memflag = 1;
-//     // else if( server.memoryLoad <= 50 )
-//     //     memflag = 2;
-//     // else if( server.memoryLoad <= 40 )
-//     //     memflag = 3;
-//     // else if( server.memoryLoad <= 20 )
-//     //     memflag = 4;
-//     // else
-//     //     memflag = 0;
-
-//     // score = Math.round((scflag+memflag+cpuflag+latflag)/4);
-
-//     if( server.statusCode == 200 )
-//      score++;
-//     if( server.latency <= 10 )
-//      score++;
-//     if( server.cpu <= 50 )
-//      score++;
-//     if( server.memoryLoad <= 50 )
-//      score++;
-
-//     server.status = score2color(score/4);
-
-//     console.log(`${server.name} ${score}`);
-
-//     // Add score to trend data.
-//     server.scoreTrend.push( (4-score));
-//     if( server.scoreTrend.length > 100 )
-//     {
-//         server.scoreTrend.shift();
-//     }
-// }
-
 
 class Production
 {
@@ -173,12 +96,10 @@ class Production
 
   main();
 
-
-  // canary_analysis();
 })();
 
 
-function latency_status(canary_analysis) {
+function latency_status() {
   // latency blue
   let cntlatblue=0;
   var latencyblue = setInterval( function ()
@@ -200,7 +121,7 @@ function latency_status(canary_analysis) {
         obj['blueLatency'] = servers[0].latencyList;
         obj['blueStatus'] = servers[0].statuscodeList;
 
-        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
+        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8');
       }
     }
 
@@ -252,14 +173,9 @@ function latency_status(canary_analysis) {
         obj['greenLatency'] = servers[1].latencyList;
         obj['greenStatus'] = servers[1].statuscodeList;
 
-        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
+        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8');
+        fs.copyFileSync(statsfilePath, '/bakerx/canary/stats.json');
       }
-      // let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
-      // let obj = JSON.parse(statsFile);
-
-      canary_analysis();
-
-      // fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
     }
 
     let now=Date.now();
@@ -290,90 +206,6 @@ function latency_status(canary_analysis) {
   }, latencyTime);
 }
 
-
-function canary_analysis() {
-  let passed = 0;
-  
-  let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
-  let obj = JSON.parse(statsFile);
-
-  console.log("\n Generating report ...");
-  var report = "";
-
-  var u, samples;
-  
-  // cpu usage canary
-  samples = [obj['blueCpu'], obj['greenCpu']];
-  u = mwu.test(samples);
-
-  if( mwu.significant(u, samples) ) {
-    report += "\nCPU usage: FAILED";
-  }
-  else {
-    report += "\nCPU usage: PASSED";
-    passed++;
-  }
-
-  // memory load canary
-  samples = [obj['blueMemory'], obj['greenMemory']];
-  u = mwu.test(samples);
-
-  if( mwu.significant(u, samples) ) {
-    report += "\nMemory Load: FAILED";
-  }
-  else {
-    report += "\nMemory Load: PASSED";
-    passed++;
-  }
-
-  // latency canary
-  samples = [obj['blueLatency'], obj['greenLatency']];
-  u = mwu.test(samples);
-
-  if( mwu.significant(u, samples) ) {
-    report += "\nLatency: FAILED";
-  }
-  else {
-    report += "\nLatency: PASSED";
-    passed++;
-  }
-
-  // status code canary
-  samples = [obj['blueStatus'], obj['greenStatus']];
-  u = mwu.test(samples);
-
-  if( mwu.significant(u, samples) ) {
-    report += "\nStatus Code: FAILED";
-  }
-  else {
-    report += "\nStatus Code: PASSED";
-    passed++;
-  }
-
-  let total=4;
-  report += `\n${passed} out of ${total} metrics passed !!`;
-
-  let passedPercentage = passed/total;
-
-  if(passedPercentage >= 0.75) {
-    report += "\n\n----- CANARY PASSED -----\n";
-  }
-  else {
-    report += "\n\n----- CANARY FAILED -----\n";
-  }
-
-  // write to local server folder
-  fs.writeFileSync(canaryReportPath, report, (err) => {
-    if(err)
-      console.log(err);
-  });
-
-  // write to /bakerx
-  fs.writeFileSync('/bakerx/canary/canary_report.txt', report, (err) => {
-    if(err)
-      console.log(err);
-  });
-}
 
 function main() {
   console.log("IN MAIN FUNCTION");
@@ -438,7 +270,7 @@ function main() {
               fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
             }
 
-            latency_status(canary_analysis);
+            latency_status();
           });
         }
 

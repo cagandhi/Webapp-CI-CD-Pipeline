@@ -21,19 +21,3 @@
 - name: Install npm packages
   npm:
     path: /home/vagrant/agent/
-
-- name: Delete agent health service using pm2
-  shell: pm2 stop agentHealth
-  ignore_errors: yes
-
-- name: Start agent health service using pm2 (blue)
-  shell: 
-    cmd: pm2 start index.js --name agentHealth -- blue
-    chdir: /home/vagrant/agent/
-  when: inventory_hostname == "blue"
-
-- name: Start agent health service using pm2 (green)
-  shell: 
-    cmd: pm2 start index.js --name agentHealth -- green
-    chdir: /home/vagrant/agent/
-  when: inventory_hostname == "green"

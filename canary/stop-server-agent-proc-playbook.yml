@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: yes
+  no_log: True
+  gather_facts: no
+  tasks:
+    - name: Stop agent health service using pm2
+      shell: pm2 stop agentHealth
+      ignore_errors: yes
+      when: inventory_hostname != "proxy"
+
+    - name: Stop server health service using pm2
+      shell: pm2 stop proxyServer
+      ignore_errors: yes
+      when: inventory_hostname == "proxy"

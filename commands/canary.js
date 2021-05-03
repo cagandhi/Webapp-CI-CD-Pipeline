@@ -29,22 +29,173 @@ exports.handler = async argv => {
 
 };
 
+// let canaryReportPath = path.join(__dirname.split(path.sep).slice(0,-1).join(path.sep), 'canary', 'canary_report.txt');
+let statsfilePath = path.join(__dirname.split(path.sep).slice(0,-1).join(path.sep), 'canary', 'stats.json');
+
+const mwu = require('../lib/mannwhitneyu')
+function canary_analysis() {
+  let passed = 0;
+  
+  let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
+  let obj = JSON.parse(statsFile);
+
+  var report = "";
+
+  let d;
+  const sigvalue = 0.05;
+
+  // cpu usage
+  d = mwu.test(obj['blueCpu'], obj['greenCpu']);
+  if (d.p < sigvalue) {
+    report += "\nCPU usage: FAILED";
+  } else {
+    report += "\nCPU usage: PASSED";
+    passed++;
+  }
+
+  // memory load
+  d = mwu.test(obj['blueMemory'], obj['greenMemory']);
+  if (d.p < sigvalue) {
+    report += "\nMemory load: FAILED";
+  } else {
+    report += "\nMemory load: PASSED";
+    passed++;
+  }
+
+  // latency
+  d = mwu.test(obj['blueLatency'], obj['greenLatency']);
+  if (d.p < sigvalue) {
+    report += "\nLatency: FAILED";
+  } else {
+    report += "\nLatency: PASSED";
+    passed++;
+  }
+
+  // status code
+  d = mwu.test(obj['blueStatus'], obj['greenStatus']);
+  if (d.p < sigvalue) {
+    report += "\nStatus code: FAILED";
+  } else {
+    report += "\nStatus code: PASSED";
+    passed++;
+  }
+
+  let total=4;
+  report += `\n${passed} out of ${total} metrics passed !!`;
+
+  let passedPercentage = passed/total;
+
+  if(passedPercentage >= 0.75) {
+    report += "\n\n----- CANARY PASSED -----";
+  }
+  else {
+    report += "\n\n----- CANARY FAILED -----";
+  }
+
+  console.log(report);
+}
+
+// const mwu = require('mann-whitney-utest');
+// function canary_analysis() {
+//   let passed = 0;
+  
+//   let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
+//   let obj = JSON.parse(statsFile);
+
+//   console.log("\n Generating report ...");
+//   var report = "";
+
+//   var u, samples;
+  
+//   // cpu usage canary
+//   samples = [obj['blueCpu'], obj['greenCpu']];
+//   u = mwu.test(samples);
+
+//   if( mwu.significant(u, samples) ) {
+//     report += "\nCPU usage: FAILED";
+//   }
+//   else {
+//     report += "\nCPU usage: PASSED";
+//     passed++;
+//   }
+
+//   // memory load canary
+//   samples = [obj['blueMemory'], obj['greenMemory']];
+//   u = mwu.test(samples);
+
+//   if( mwu.significant(u, samples) ) {
+//     report += "\nMemory Load: FAILED";
+//   }
+//   else {
+//     report += "\nMemory Load: PASSED";
+//     passed++;
+//   }
+
+//   // latency canary
+//   samples = [obj['blueLatency'], obj['greenLatency']];
+//   u = mwu.test(samples);
+
+//   if( mwu.significant(u, samples) ) {
+//     report += "\nLatency: FAILED";
+//   }
+//   else {
+//     report += "\nLatency: PASSED";
+//     passed++;
+//   }
+
+//   // status code canary
+//   samples = [obj['blueStatus'], obj['greenStatus']];
+//   u = mwu.test(samples);
+
+//   if( mwu.significant(u, samples) ) {
+//     report += "\nStatus Code: FAILED";
+//   }
+//   else {
+//     report += "\nStatus Code: PASSED";
+//     passed++;
+//   }
+
+//   let total=4;
+//   report += `\n${passed} out of ${total} metrics passed !!`;
+
+//   let passedPercentage = passed/total;
+
+//   if(passedPercentage >= 0.75) {
+//     report += "\n\n----- CANARY PASSED -----\n";
+//   }
+//   else {
+//     report += "\n\n----- CANARY FAILED -----\n";
+//   }
+
+//   // write to local server folder
+//   fs.writeFileSync(canaryReportPath, report, (err) => {
+//     if(err)
+//       console.log(err);
+//   });
+
+//   // write to /bakerx
+//   fs.writeFileSync('/bakerx/canary/canary_report.txt', report, (err) => {
+//     if(err)
+//       console.log(err);
+//   });
+// }
+
+
 async function run(blueBranch, greenBranch) {
 
-    let canaryReportPath = path.join(__dirname.split(path.sep).slice(0,-1).join(path.sep), 'canary', 'canary_report.txt')
+    console.log('stats json path :: '+statsfilePath);
 
-    console.log('canary report path :: '+canaryReportPath);
-    // 'canary/canary_report.txt';
-
-    // delete canary report file if it exists in canary/ folder
+    // delete canary stats json file if it exists in canary/ folder
     try {
-        if(fs.existsSync(canaryReportPath)){
-            console.log('Removing existing canary report file');
-            fs.unlinkSync(canaryReportPath);
+        if(fs.existsSync(statsfilePath)){
+            console.log('Removing existing stats json file ...');
+            fs.unlinkSync(statsfilePath);
         }
     } catch(err) {
 
     }
+
+    
     
     /*
 
@@ -72,8 +223,8 @@ async function run(blueBranch, greenBranch) {
     // if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
 
-
-        
+    
+          
 
     // 1b. Set up proxy service on proxy/monitor VM, start health agents on server
     let filePath = '/bakerx/canary/proxy-playbook.yml';
@@ -85,16 +236,16 @@ async function run(blueBranch, greenBranch) {
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
     
-
     /*
+    
 
     // 1c. set up blue and green VMs
     console.log(chalk.yellow('Provisioning blue and green VMs'));
     result = child.spawnSync(`bakerx`, `run`.split(' '), {shell:true, stdio: 'inherit'} );
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
-
     */
+    
     
 
 
@@ -104,8 +255,8 @@ async function run(blueBranch, greenBranch) {
     vaultFilePath = '/bakerx/.vault-pass';
 
     // hardcoded blue and green branch values because as instructed by TA, blue always contains master and green always contains broken
-    // let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch='+blueBranch+' '+'greenBranch='+greenBranch;
-    let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch=master'+' '+'greenBranch=broken';
+    let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch='+blueBranch+' '+'greenBranch='+greenBranch;
+    // let extraVar = 'proxyIp='+proxyIP+' '+'blueBranch=master'+' '+'greenBranch=broken';
 
     console.log(chalk.yellow(`extra var :: ${extraVar}`));
     
@@ -117,8 +268,8 @@ async function run(blueBranch, greenBranch) {
 
         
 
-    // 1e. Start proxy.js and load generation
-    filePath = '/bakerx/canary/start-proxy-playbook.yml';
+    // 1e. Start proxy.js and load generation and agent health collection 
+    filePath = '/bakerx/canary/start-server-agent-proc-playbook.yml';
     inventoryPath = '/bakerx/canary/inventory.ini';
     vaultFilePath = '/bakerx/.vault-pass';
 
@@ -126,28 +277,26 @@ async function run(blueBranch, greenBranch) {
     result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
+
     // 1f. wait for report file to be ready
     console.log(chalk.yellow('Waiting for canary report to be generated...'));
     while(true)
     {
         try {
-            if(fs.existsSync(canaryReportPath)) {
-                console.log(chalk.yellow('\nPRINTING CANARY REPORT --- \n'));
-                
-                try {
-                    // read contents of the file
-                    const data = fs.readFileSync(canaryReportPath, 'UTF-8');
+            if(fs.existsSync(statsfilePath)) {
 
-                    // split the contents by new line
-                    const lines = data.split(/\r?\n/);
+                filePath = '/bakerx/canary/stop-server-agent-proc-playbook.yml';
+                inventoryPath = '/bakerx/canary/inventory.ini';
+                vaultFilePath = '/bakerx/.vault-pass';
 
-                    // print all lines
-                    lines.forEach((line) => {
-                        console.log(line);
-                    });
-                } catch (err) {
-                    console.error(err);
-                }
+                console.log(chalk.yellow("\nStopping proxy and client agent health collection processes..."));
+                result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
+                if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+                console.log("\n////////////////////////////////////");
+                console.log(chalk.yellow('PRINTING CANARY REPORT ---'));
+                canary_analysis();
+                console.log("////////////////////////////////////\n");
 
                 break;
             }

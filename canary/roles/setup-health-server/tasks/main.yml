@@ -27,10 +27,3 @@
 - name: Install npm packages
   npm:
     path: /home/vagrant/server/
-
-# - name: Install siege via apt
-#   apt:
-#     name: siege
-#     state: latest
-#     update_cache: yes
-
