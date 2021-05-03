@@ -2,6 +2,6 @@
   become: yes
   gather_facts: no
   roles:
-    - install-pip-job-builder
-    - install-pm2
+    # - install-pip-job-builder
+    # - install-pm2
     - setup-health-server

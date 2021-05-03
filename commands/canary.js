@@ -78,8 +78,8 @@ async function run(blueBranch, greenBranch) {
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
 
-
-
+    */
+    
 
 
     // 1d. Install checkbox.io microservice dependencies on blue and green VMs, setup health agents and start service
@@ -99,7 +99,7 @@ async function run(blueBranch, greenBranch) {
     result = sshSync(runCmd, 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
-    */
+        
 
     // 1e. Start proxy.js and load generation
     filePath = '/bakerx/canary/start-proxy-playbook.yml';
