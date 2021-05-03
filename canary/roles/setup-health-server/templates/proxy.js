@@ -2,7 +2,7 @@ const redis = require('redis');
 const chalk = require('chalk');
 const path = require('path');
 const os = require('os');
-//const mwu = require('mann-whitney-utest');
+const mwu = require('mann-whitney-utest');
 const got = require('got');
 const http = require('http');
 const httpProxy = require('http-proxy');
@@ -13,13 +13,15 @@ const BLUE  = 'http://192.168.44.25:3000/preview';
 const GREEN = 'http://192.168.44.30:3000/preview';
 
 let client = redis.createClient(6379, 'localhost', {});
-let reqTime=40; // time in ms at which request will be sent - change to 10
+let reqTime=20; // time in ms at which request will be sent - change to 10
 let maxReqCnt=(60*1000)/reqTime; // no of times request can be sent in 1 min - change nr to 60
 let latencyTime=1000;
 let maxLatReqCnt=(60*1000)/latencyTime;
 
 var blueStart=-1, blueEnd=-1, greenStart=-1, greenEnd=-1;
 
+const statsfilePath = '/home/vagrant/server/stats.json';
+const canaryReportPath = '/home/vagrant/server/canary_report.txt';
 
 let obj={};
 
@@ -158,11 +160,23 @@ class Production
 
 (() => 
 {
+  // remove stats json if it exists
+  try {
+    if(fs.existsSync(statsfilePath))
+    {
+      // file exists
+      fs.unlinkSync(statsfilePath);
+    }
+  } catch(err) {
+    
+  }
+
   main();
+  // canary_analysis();
 })();
 
 
-function latency_status() {
+function latency_status(canary_analysis) {
   // latency blue
   let cntlatblue=0;
   var latencyblue = setInterval( function ()
@@ -172,10 +186,10 @@ function latency_status() {
       clearInterval(latencyblue);
 
       try {
-        if(fs.existsSync('stats.json'))
+        if(fs.existsSync(statsfilePath))
         {
           // file exists
-          let statsFile = fs.readFileSync('stats.json', 'utf-8');
+          let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
           obj = JSON.parse(statsFile);
         }
       } catch(err) {
@@ -184,7 +198,7 @@ function latency_status() {
         obj['blueLatency'] = servers[0].latencyList;
         obj['blueStatus'] = servers[0].statuscodeList;
 
-        fs.writeFileSync('stats.json', JSON.stringify(obj), 'utf-8')
+        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
       }
     }
 
@@ -224,10 +238,10 @@ function latency_status() {
       clearInterval(latencygreen);
 
       try {
-        if(fs.existsSync('stats.json'))
+        if(fs.existsSync(statsfilePath))
         {
           // file exists
-          let statsFile = fs.readFileSync('stats.json', 'utf-8');
+          let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
           obj = JSON.parse(statsFile);
         }
       } catch(err) {
@@ -236,14 +250,14 @@ function latency_status() {
         obj['greenLatency'] = servers[1].latencyList;
         obj['greenStatus'] = servers[1].statuscodeList;
 
-        fs.writeFileSync('stats.json', JSON.stringify(obj), 'utf-8')
+        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
       }
-      // let statsFile = fs.readFileSync('stats.json', 'utf-8');
+      // let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
       // let obj = JSON.parse(statsFile);
 
-      
+      canary_analysis();
 
-      // fs.writeFileSync('stats.json', JSON.stringify(obj), 'utf-8')
+      // fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
     }
 
     let now=Date.now();
@@ -274,6 +288,82 @@ function latency_status() {
   }, latencyTime);
 }
 
+
+function canary_analysis() {
+  let passed = 0;
+  
+  let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
+  let obj = JSON.parse(statsFile);
+
+  console.log("\n Generating report ...");
+  var report = "\nCANARY ANALYSIS\n";
+
+  var u, samples;
+  
+  // cpu usage canary
+  samples = [obj['blueCpu'], obj['greenCpu']];
+  u = mwu.test(samples);
+
+  if( mwu.significant(u, samples) ) {
+    report += "\nCPU usage: FAILED";
+  }
+  else {
+    report += "\nCPU usage: PASSED";
+    passed++;
+  }
+
+  // memory load canary
+  samples = [obj['blueMemory'], obj['greenMemory']];
+  u = mwu.test(samples);
+
+  if( mwu.significant(u, samples) ) {
+    report += "\nMemory Load: FAILED";
+  }
+  else {
+    report += "\nMemory Load: PASSED";
+    passed++;
+  }
+
+  // latency canary
+  samples = [obj['blueLatency'], obj['greenLatency']];
+  u = mwu.test(samples);
+
+  if( mwu.significant(u, samples) ) {
+    report += "\nLatency: FAILED";
+  }
+  else {
+    report += "\nLatency: PASSED";
+    passed++;
+  }
+
+  // status code canary
+  samples = [obj['blueStatus'], obj['greenStatus']];
+  u = mwu.test(samples);
+
+  if( mwu.significant(u, samples) ) {
+    report += "\nStatus Code: FAILED";
+  }
+  else {
+    report += "\nStatus Code: PASSED";
+    passed++;
+  }
+
+  console.log(report);
+
+  let passedPercentage = passed/4;
+
+  if(passedPercentage >= 0.75) {
+    report += "\n\n----- CANARY PASSED !! -----\n";
+  }
+  else {
+    report += "\n\n----- CANARY FAILED !! -----\n";
+  }
+
+  fs.writeFileSync(canaryReportPath, report, (err) => {
+    if(err)
+      console.log(err);
+  });
+}
 
 function main() {
   console.log("IN MAIN FUNCTION");
@@ -317,9 +407,9 @@ function main() {
             }
 
             try {
-              if(fs.existsSync('stats.json'))
+              if(fs.existsSync(statsfilePath))
               {
-                let statsFile = fs.readFileSync('stats.json', 'utf-8');
+                let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
                 obj = JSON.parse(statsFile);
               }
             } catch(err) {
@@ -335,10 +425,10 @@ function main() {
                   obj['greenMemory'] = server.memoryList;
                 }
               }
-              fs.writeFileSync('stats.json', JSON.stringify(obj), 'utf-8')
+              fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
             }
 
-            latency_status();
+            latency_status(canary_analysis);
           });
 
         }
