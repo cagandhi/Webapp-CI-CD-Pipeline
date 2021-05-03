@@ -172,6 +172,8 @@ class Production
   }
 
   main();
+
+
   // canary_analysis();
 })();
 
@@ -296,7 +298,7 @@ function canary_analysis() {
   let obj = JSON.parse(statsFile);
 
   console.log("\n Generating report ...");
-  var report = "\nCANARY ANALYSIS\n";
+  var report = "";
 
   var u, samples;
   
@@ -348,18 +350,26 @@ function canary_analysis() {
     passed++;
   }
 
-  console.log(report);
+  let total=4;
+  report += `\n${passed} out of ${total} metrics passed !!`;
 
-  let passedPercentage = passed/4;
+  let passedPercentage = passed/total;
 
   if(passedPercentage >= 0.75) {
-    report += "\n\n----- CANARY PASSED !! -----\n";
+    report += "\n\n----- CANARY PASSED -----\n";
   }
   else {
-    report += "\n\n----- CANARY FAILED !! -----\n";
+    report += "\n\n----- CANARY FAILED -----\n";
   }
 
+  // write to local server folder
   fs.writeFileSync(canaryReportPath, report, (err) => {
+    if(err)
+      console.log(err);
+  });
+
+  // write to /bakerx
+  fs.writeFileSync('/bakerx/canary/canary_report.txt', report, (err) => {
     if(err)
       console.log(err);
   });

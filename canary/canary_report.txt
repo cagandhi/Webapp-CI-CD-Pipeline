@@ -1,0 +1,9 @@
+
+
+CPU usage: PASSED
+Memory Load: PASSED
+Latency: PASSED
+Status Code: FAILED
+3 out of 4 metrics
+
+----- CANARY PASSED -----

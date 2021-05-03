@@ -8,6 +8,8 @@ const sshSync = require('../lib/ssh');
 const scpSync = require('../lib/scp');
 const jenkins = require('jenkins')({ baseUrl: 'http://admin:admin@192.168.33.20:9000', crumbIssuer: true, promisify: true });
 
+const readline = require('readline');
+
 const proxyIP = '192.168.44.92';
 
 exports.command = 'canary <blueBranch> <greenBranch>';
@@ -29,6 +31,20 @@ exports.handler = async argv => {
 
 async function run(blueBranch, greenBranch) {
 
+    let canaryReportPath = path.join(__dirname.split(path.sep).slice(0,-1).join(path.sep), 'canary', 'canary_report.txt')
+
+    console.log('canary report path :: '+canaryReportPath);
+    // 'canary/canary_report.txt';
+
+    // delete canary report file if it exists in canary/ folder
+    try {
+        if(fs.existsSync(canaryReportPath)){
+            console.log('Removing existing canary report file');
+            fs.unlinkSync(canaryReportPath);
+        }
+    } catch(err) {
+
+    }
     
     /*
 
@@ -109,4 +125,34 @@ async function run(blueBranch, greenBranch) {
     console.log(chalk.yellow("Starting proxy and load generation..."));
     result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+    // 1f. wait for report file to be ready
+    console.log(chalk.yellow('Waiting for canary report to be generated...'));
+    while(true)
+    {
+        try {
+            if(fs.existsSync(canaryReportPath)) {
+                console.log(chalk.yellow('\nPRINTING CANARY REPORT --- \n'));
+                
+                try {
+                    // read contents of the file
+                    const data = fs.readFileSync(canaryReportPath, 'UTF-8');
+
+                    // split the contents by new line
+                    const lines = data.split(/\r?\n/);
+
+                    // print all lines
+                    lines.forEach((line) => {
+                        console.log(line);
+                    });
+                } catch (err) {
+                    console.error(err);
+                }
+
+                break;
+            }
+        } catch(err) {
+            continue;
+        }
+    }
 }
