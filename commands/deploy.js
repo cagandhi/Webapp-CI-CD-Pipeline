@@ -13,7 +13,7 @@ exports.builder = yargs => {
         inventory: {
             alias: 'i',
             describe: 'inventory file',
-            default: '/bakerx/deploy/inventory.ini',
+            default: '/bakerx/inventory.ini',
             type: 'string'
         },
     });
@@ -38,7 +38,7 @@ async function run(job_name, inventory) {
     else if(job_name == "iTrust") {
         filePath = '/bakerx/deploy/itrust_playbook.yml';
     }
-    let inventoryPath = inventory;
+    let inventoryPath = '/bakerx/' + inventory;
     let vaultFilePath = '/bakerx/.vault-pass';
     
     console.log(chalk.blueBright(`Deploying ${job_name}...`));
