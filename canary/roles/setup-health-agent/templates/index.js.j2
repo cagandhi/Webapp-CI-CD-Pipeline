@@ -3,6 +3,8 @@ const util  = require('util');
 const os = require('os');
 const si = require('systeminformation');
 
+var cnt = 0;
+
 // Calculate metrics.
 // TASK 1:
 class Agent
@@ -39,19 +41,26 @@ async function main(name)
         console.log(e);
         process.exit(1);
     });
-    let client = {};
-    client.publish = util.promisify(connection.publish).bind(connection);
+    
+    //let client = {};
+    //client.publish = util.promisify(connection.publish).bind(connection);
 
     // Push update ever 1 second
-    setInterval(async function()
-    {
+    var inte = setInterval(async function func() {
+        if(cnt > 118) {
+            clearInterval(inte);
+        }
+
         let payload = {
             memoryLoad: agent.memoryLoad(),
-            cpu: await agent.cpu()
+            cpu: await agent.cpu(),
+            timestamp: ((new Date()).getTime()/1000),
         };
         let msg = JSON.stringify(payload);
-        await client.publish(name, msg);
+        //await client.publish(name, msg);
+        await connection.lpush(name, msg);
         console.log(`${name} ${msg}`);
+        cnt++;
     }, 1000);
 
 }

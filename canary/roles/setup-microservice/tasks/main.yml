@@ -7,6 +7,7 @@
     repo: 'https://github.com/chrisparnin/checkbox.io-micro-preview.git'
     dest: /home/vagrant/checkbox.io-micro-preview/
     version: "{{ blueBranch }}"
+    force: yes
   when: inventory_hostname == "blue"
 
 - name: Git clone miroservice preview repo, broken branch (green)
@@ -14,6 +15,7 @@
     repo: 'https://github.com/chrisparnin/checkbox.io-micro-preview.git'
     dest: /home/vagrant/checkbox.io-micro-preview/
     version: "{{ greenBranch }}"
+    force: yes
   when: inventory_hostname == "green"
 
 - name: Install npm packages
@@ -21,7 +23,7 @@
     path: /home/vagrant/checkbox.io-micro-preview
 
 - name: Delete micro checkbox service using pm2
-  shell: pm2 delete micro
+  shell: pm2 stop micro
   ignore_errors: yes
 
 - name: Start micro checkbox service using pm2

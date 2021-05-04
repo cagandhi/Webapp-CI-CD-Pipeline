@@ -1,45 +1,43 @@
+const redis = require('redis');
 const chalk = require('chalk');
 const path = require('path');
 const os = require('os');
-//const mwu = require('mann-whitney-utest');
+
 const got = require('got');
 const http = require('http');
 const httpProxy = require('http-proxy');
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 
+
 const BLUE  = 'http://192.168.44.25:3000/preview';
 const GREEN = 'http://192.168.44.30:3000/preview';
 
-//const blue_preview=`http://192.168.44.25:3000/preview`;
-//const green_preview=`http://192.168.44.30:3000/preview`;
+let client = redis.createClient(6379, 'localhost', {});
+let reqTime=20; // time in ms at which request will be sent - change to 10
+let maxReqCnt=(60*1000)/reqTime; // no of times request can be sent in 1 min - change nr to 60
+let latencyTime=1000;
+let maxLatReqCnt=(60*1000)/latencyTime;
 
+var blueStart=-1, blueEnd=-1, greenStart=-1, greenEnd=-1;
+
+const statsfilePath = '/home/vagrant/server/stats.json';
+// const statsfilePath = '/bakerx/canary/stats.json';
+
+let obj={};
+
+/// Servers data being monitored.
+var servers =
+[
+  {name: "blue", url: BLUE, status: "#cccccc",  scoreTrend : [0], cpuList: [], memoryList: [], latencyList: [], statuscodeList: []},
+  {name: "green", url: GREEN, status: "#cccccc",  scoreTrend : [0], cpuList: [], memoryList: [], latencyList: [], statuscodeList: []},
+];
 
 class Production
 {
     constructor()
     {
         this.TARGET = BLUE;
-        //this.server_id=0;
-        setInterval( this.healthCheck.bind(this), 5000 );
-    /*
-    //https://stackoverflow.com/questions/6893130/how-to-set-one-minute-counter-in-javascript
-    let minutes=1;
-
-    setTimeout(() => {
-            
-            this.TARGET = BLUE;
-            this.server_id= 1;
-            
-        }, minutes*60*1000);
-        
-        
-    setTimeout(() => {
-        
-        this.TARGET = GREEN;
-        this.server_id = 0;      
-        }, 2*minutes*60*1000);
-        */
     }
     
     
@@ -83,102 +81,225 @@ class Production
 
 }
 
-(async () => 
+(() => 
 {
-    // Get agent name from command line.
+  // remove stats json if it exists
+  try {
+    if(fs.existsSync(statsfilePath))
+    {
+      // file exists
+      fs.unlinkSync(statsfilePath);
+    }
+  } catch(err) {
     
-    await main();
+  }
+
+  main();
 
 })();
 
-async function main() {
 
-  console.log(chalk.keyword('pink')('Starting proxy on localhost:3090'));
-//  let client = redis.createClient(6379, 'localhost', {});
+function latency_status() {
+  // latency blue
+  let cntlatblue=0;
+  var latencyblue = setInterval( function ()
+  {
+    if(cntlatblue>=maxLatReqCnt)
+    {
+      clearInterval(latencyblue);
+
+      try {
+        if(fs.existsSync(statsfilePath))
+        {
+          // file exists
+          let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
+          obj = JSON.parse(statsFile);
+        }
+      } catch(err) {
+        obj = {};
+      } finally {
+        obj['blueLatency'] = servers[0].latencyList;
+        obj['blueStatus'] = servers[0].statuscodeList;
+
+        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8');
+      }
+    }
+
+    let now=Date.now();
+    let server={};
+
+    console.log("blue latency")
+    let res = got.post(BLUE, {
+      json: JSON.parse(fs.readFileSync('survey.json', 'utf-8')),
+      responseType: 'json',
+      throwHttpErrors: false
+    }).then(function(res)
+    {
+      // TASK 2
+      server.statusCode = res.statusCode;
+      server.latency = Date.now()-now;
+    }).catch( e =>
+    {
+      server.statusCode = e.code;
+      server.latency = latencyTime;
+    }).finally( () => 
+    {
+      let x = servers[0];
+      x.latencyList.push(server.latency);
+      x.statuscodeList.push(server.statusCode);
+    });
+
+    cntlatblue++;
+  }, latencyTime);
+
+  // latency green
+  let cntlatgreen=0;
+  var latencygreen = setInterval( function ()
+  {
+    if(cntlatgreen>=maxLatReqCnt)
+    {
+      clearInterval(latencygreen);
+
+      try {
+        if(fs.existsSync(statsfilePath))
+        {
+          // file exists
+          let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
+          obj = JSON.parse(statsFile);
+        }
+      } catch(err) {
+        obj = {};
+      } finally {
+        obj['greenLatency'] = servers[1].latencyList;
+        obj['greenStatus'] = servers[1].statuscodeList;
+
+        fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8');
+        fs.copyFileSync(statsfilePath, '/bakerx/canary/stats.json');
+      }
+    }
+
+    let now=Date.now();
+    let server={};
+
+    console.log("green latency")
+
+    let res = got.post(GREEN, {
+      json: JSON.parse(fs.readFileSync('survey.json', 'utf-8')),
+      responseType: 'json',
+      throwHttpErrors: false
+    }).then(function(res)
+    {
+      // TASK 2
+      server.statusCode = res.statusCode;
+      server.latency = Date.now()-now;
+    }).catch( e =>
+    {
+      server.statusCode = e.code;
+      server.latency = latencyTime;
+    }).finally( () => 
+    {
+      let x = servers[1];
+      x.latencyList.push(server.latency);
+      x.statuscodeList.push(server.statusCode);
+    });
+    cntlatgreen++;
+  }, latencyTime);
+}
+
+
+function main() {
+  console.log("IN MAIN FUNCTION");
+
   let prod = new Production();
   prod.proxy();
 
-  // send loads to blue and green VMs
-  let start_time = (new Date()).getTime()/1000;
-  // const FormData = require('form-data');
-
-  // const form = new FormData();
-  // form.append('data', fs.createReadStream('/home/vagrant/server/survey.json'));
-
   console.log("prod target is now BLUE :: "+prod.TARGET);
   let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
-  // console.log(cmd1);
 
-  const load_time = 60;
-  while(((new Date()).getTime()/1000) - start_time <= load_time)
-  {
-
-    await execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
-    // let response = await got.post(prod.TARGET, 
-    // {
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: form
-    // }).catch( err => 
-    //   console.error(err)
-    // );
-  }
-
-  prod.TARGET = GREEN;
-
-  console.log("prod target is now GREEN :: "+prod.TARGET);
-  cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
-
-  start_time = (new Date()).getTime()/1000;
-  while(((new Date()).getTime()/1000) - start_time <= load_time)
-  {
-
-    await execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
-  }
-
-  // console.log('siege blue');
-  // // import { execSync } from 'child_process';  // replace ^ if using ES modules
-  // let cmd = "siege -b -t60s --content-type 'application/json' '"+prod.TARGET+" POST < survey.json'";
-  // console.log(cmd);
-  // let output = execSync(cmd, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'inherit', 'inherit'] });
-
-  // prod.TARGET = GREEN;
-
-  // console.log("prod target changed now :: "+prod.TARGET);
-  // console.log('siege green');
-
-  // cmd = "siege -b -t60s --content-type 'application/json' '"+prod.TARGET+" POST < survey.json'";
-  // console.log(cmd);
-  // output = execSync(cmd, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'inherit', 'inherit'] });
-
-    /*
-    var latency = setInterval( function ()
+  let cntblue=0, cntgreen=0;
+  let surveyJson = JSON.parse(fs.readFileSync('/home/vagrant/server/survey.json'))
+  // generate load
+  var timerblue = setInterval(function() {
+    if(cntblue>maxReqCnt)
     {
-        for( var server of servers )
+      clearInterval(timerblue);
+
+      var timergreen = setInterval(function() {
+        if(cntgreen > maxReqCnt)
         {
-            if( server.url )
-            {
-                let now = Date.now();
+          clearInterval(timergreen);
 
-                // Bind a new variable in order to for it to be properly captured inside closure.
-                let captureServer = server;
-
-                // Make request to server we are monitoring.
-                got(server.url, {timeout: 5000, throwHttpErrors: false}).then(function(res)
-                {
-                    // TASK 2
-                    captureServer.statusCode = res.statusCode;
-                    captureServer.latency = Date.now()-now;
-                }).catch( e =>
-                {
-                    // console.log(e);
-                    captureServer.statusCode = e.code;
-                    captureServer.latency = 5000;
-                });
+          // store blue values in array
+          client.lrange("blue", 60, -1, (err, data) => {
+            for (var i = 0; i < data.length; i++) {
+              console.log("blue :: "+i);
+              let payload = JSON.parse(data[i]);
+              servers[0].cpuList.push(payload.cpu);
+              servers[0].memoryList.push(payload.memoryLoad);
             }
+          });
+
+          // store green values in array
+          client.lrange("green", 0, 59, (err, data) => {
+            for (var i = 0; i < data.length; i++) {
+              console.log("green :: "+i);
+              let payload = JSON.parse(data[i]);
+              servers[1].cpuList.push(payload.cpu);
+              servers[1].memoryList.push(payload.memoryLoad);
+            }
+
+            try {
+              if(fs.existsSync(statsfilePath))
+              {
+                let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
+                obj = JSON.parse(statsFile);
+              }
+            } catch(err) {
+              obj = {};
+            } finally {
+              for(var server of servers) {
+                if(server.name == "blue") {
+                  obj['blueCpu'] = server.cpuList;
+                  obj['blueMemory'] = server.memoryList;
+                }
+                else if(server.name == "green") {
+                  obj['greenCpu'] = server.cpuList;
+                  obj['greenMemory'] = server.memoryList;
+                }
+              }
+              fs.writeFileSync(statsfilePath, JSON.stringify(obj), 'utf-8')
+            }
+
+            latency_status();
+          });
         }
-    }, 10000);
-    */
-    
+
+        let res = got.post(GREEN, {
+          json: surveyJson,
+          responseType: 'json',
+          throwHttpErrors: false
+        });
+
+        // prod.TARGET=GREEN;
+        // // console.log("prod target is now GREEN :: "+prod.TARGET);
+        // let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
+        // execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+        cntgreen++;
+        console.log(chalk.yellow(`GREEN :: ${cntgreen}`));
+      }, reqTime);
+    }
+
+    let res = got.post(BLUE, {
+      json: surveyJson,
+      responseType: 'json',
+      throwHttpErrors: false
+    });
+
+    // // console.log("prod target is now BLUE :: "+prod.TARGET);
+    // let cmd1 = 'curl -X POST -H "Content-Type: application/json" --data @survey.json '+prod.TARGET;
+    // execSync(cmd1, { cwd: '/home/vagrant/server/', encoding: 'utf-8', stdio: ['inherit', 'ignore', 'inherit'] });
+    cntblue++;
+    console.log(chalk.yellow(`BLUE :: ${cntblue}`));
+
+  }, reqTime);  
 }

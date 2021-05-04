@@ -27,18 +27,3 @@
 - name: Install npm packages
   npm:
     path: /home/vagrant/server/
-
-- name: Install siege via apt
-  apt:
-    name: siege
-    state: latest
-    update_cache: yes
-
-- name: Delete server health service using pm2
-  shell: pm2 stop proxyServer
-  ignore_errors: yes
-
-- name: Start server health service using pm2
-  shell: 
-    cmd: pm2 start proxy.js --name proxyServer
-    chdir: /home/vagrant/server/
