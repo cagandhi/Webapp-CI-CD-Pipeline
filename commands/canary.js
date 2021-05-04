@@ -95,91 +95,6 @@ function canary_analysis() {
   console.log(report);
 }
 
-// const mwu = require('mann-whitney-utest');
-// function canary_analysis() {
-//   let passed = 0;
-  
-//   let statsFile = fs.readFileSync(statsfilePath, 'utf-8');
-//   let obj = JSON.parse(statsFile);
-
-//   console.log("\n Generating report ...");
-//   var report = "";
-
-//   var u, samples;
-  
-//   // cpu usage canary
-//   samples = [obj['blueCpu'], obj['greenCpu']];
-//   u = mwu.test(samples);
-
-//   if( mwu.significant(u, samples) ) {
-//     report += "\nCPU usage: FAILED";
-//   }
-//   else {
-//     report += "\nCPU usage: PASSED";
-//     passed++;
-//   }
-
-//   // memory load canary
-//   samples = [obj['blueMemory'], obj['greenMemory']];
-//   u = mwu.test(samples);
-
-//   if( mwu.significant(u, samples) ) {
-//     report += "\nMemory Load: FAILED";
-//   }
-//   else {
-//     report += "\nMemory Load: PASSED";
-//     passed++;
-//   }
-
-//   // latency canary
-//   samples = [obj['blueLatency'], obj['greenLatency']];
-//   u = mwu.test(samples);
-
-//   if( mwu.significant(u, samples) ) {
-//     report += "\nLatency: FAILED";
-//   }
-//   else {
-//     report += "\nLatency: PASSED";
-//     passed++;
-//   }
-
-//   // status code canary
-//   samples = [obj['blueStatus'], obj['greenStatus']];
-//   u = mwu.test(samples);
-
-//   if( mwu.significant(u, samples) ) {
-//     report += "\nStatus Code: FAILED";
-//   }
-//   else {
-//     report += "\nStatus Code: PASSED";
-//     passed++;
-//   }
-
-//   let total=4;
-//   report += `\n${passed} out of ${total} metrics passed !!`;
-
-//   let passedPercentage = passed/total;
-
-//   if(passedPercentage >= 0.75) {
-//     report += "\n\n----- CANARY PASSED -----\n";
-//   }
-//   else {
-//     report += "\n\n----- CANARY FAILED -----\n";
-//   }
-
-//   // write to local server folder
-//   fs.writeFileSync(canaryReportPath, report, (err) => {
-//     if(err)
-//       console.log(err);
-//   });
-
-//   // write to /bakerx
-//   fs.writeFileSync('/bakerx/canary/canary_report.txt', report, (err) => {
-//     if(err)
-//       console.log(err);
-//   });
-// }
-
 
 async function run(blueBranch, greenBranch) {
 
@@ -197,7 +112,7 @@ async function run(blueBranch, greenBranch) {
 
     
     
-    /*
+    
 
     // 1a. set up monitor/proxy VM
     console.log(chalk.yellow('Pulling queues image from bakerx'));
@@ -206,26 +121,8 @@ async function run(blueBranch, greenBranch) {
 
     console.log(chalk.yellow('Provisioning monitoring/proxy server...'));
     result = child.spawnSync(`bakerx`, `run monitor1 queues --ip ${proxyIP} --sync`.split(' '), {shell:true, stdio: 'inherit'} );
-    if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    */
-
-
-
-    // //  1a (a) Copy bakerx private key to vm
-    // console.log(chalk.yellow('Create .bakerx directory in home'));
-    // result = sshSync('mkdir -p /home/vagrant/.bakerx', 'vagrant@192.168.33.20');
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    // console.log(chalk.yellow('Copy private key to config-srv VM so that it connect to blue and green VMs to execute ansible playbook'));
-    // let identifyFile = path.join(os.homedir(), '.bakerx', 'insecure_private_key');
-    // result = scpSync(identifyFile, `vagrant@192.168.33.20:/home/vagrant/.bakerx/insecure_private_key`);
-    // if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-
-    
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }    
           
-
     // 1b. Set up proxy service on proxy/monitor VM, start health agents on server
     let filePath = '/bakerx/canary/proxy-playbook.yml';
     let inventoryPath = '/bakerx/canary/inventory.ini';
@@ -235,18 +132,11 @@ async function run(blueBranch, greenBranch) {
     result = sshSync(`/bakerx/cm/run-ansible.sh ${filePath} ${inventoryPath} ${vaultFilePath}`, 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
-    
-    /*
-    
 
     // 1c. set up blue and green VMs
     console.log(chalk.yellow('Provisioning blue and green VMs'));
     result = child.spawnSync(`bakerx`, `run`.split(' '), {shell:true, stdio: 'inherit'} );
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
-    */
-    
-    
 
 
     // 1d. Install checkbox.io microservice dependencies on blue and green VMs, setup health agents and start service

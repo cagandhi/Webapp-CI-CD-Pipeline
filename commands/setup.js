@@ -60,13 +60,24 @@ async function run(privateKey, gh_user, gh_pass, user, password) {
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
     console.log(chalk.blueBright('Running init script...'));
+    
     result = sshSync('/bakerx/cm/server-init.sh', 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+    //  1a (a) Copy bakerx private key to vm
+    console.log(chalk.yellow('Create .bakerx directory in home'));
+    result = sshSync('mkdir -p /home/vagrant/.bakerx', 'vagrant@192.168.33.20');
+    if( result.error ) { console.log(result.error); process.exit( result.status ); }
+
+    console.log(chalk.yellow('Copy private key to config-srv VM so that it connect to blue and green VMs to execute ansible playbook'));
+    let identifyFile = path.join(os.homedir(), '.bakerx', 'insecure_private_key');
+    result = scpSync(identifyFile, `vagrant@192.168.33.20:/home/vagrant/.bakerx/insecure_private_key`);
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
 
     console.log(chalk.blueBright('Setting up the Jenkins server and build environment ...'));
     result = sshSync('/bakerx/cm/run-ansible.sh /bakerx/cm/playbook.yml /bakerx/cm/inventory.ini /bakerx/.vault-pass', 'vagrant@192.168.33.20');
     if( result.error ) { console.log(result.error); process.exit( result.status ); }
-
+    
     // if either of gh_user and gh_pass value is undefined but not both
     if(gh_user || gh_pass) {
 
