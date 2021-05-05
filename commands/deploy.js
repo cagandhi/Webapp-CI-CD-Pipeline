@@ -13,7 +13,7 @@ exports.builder = yargs => {
         inventory: {
             alias: 'i',
             describe: 'inventory file',
-            default: '/bakerx/inventory.ini',
+            default: 'inventory.ini',
             type: 'string'
         },
     });
