@@ -71,7 +71,19 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 
 ### Experiences and learnings about system setup-M3
 
+* Parameterise everything. Any hardcoding in the scripts is cumbersome to manage. for example, proxy was listening on hardcoded port 3090. If another process was running, we had to manually change the file and copy the file to the vm and then restart the process. Having it paramterised would make it easy to change ports as and when required.
+
+* We generated a computing environment with 3 vms: proxy, blue and green for netflix-style canary analysis. The load was generated and initially sent to proxy server by requesting /preview service. Health metrics were collected for 1 min each firstly for blue and then green server. Statistical measure like Mann whitney u test was used for comparison between the health values. Canary score was calculated for passed and failed tests.
+
+* 
+
 ### Issues Faced-M3
+
+* Running so many vms on a single machine was tough, had to save certain vms and then boot up other vms so that there wouldn't be any starvation issues, operation timed out issues, etc.
+
+* The main issue faced was while running sshsync command, we were not able to login to the ip on port 22 and the operation timed out. 
+
+* Synchronising sending of data from blue and green vm and collecting it on proxy/monitor vm. Sometimes, blue, green vms would send a lot of data which would result in heap error. So, had to limit sending of data and disable it once a certain limit reaches.
 
 ### Screencast-M3
 
@@ -79,6 +91,11 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 * [pipeline build iTrust](https://drive.google.com/file/d/1z1gFPoDicg-CGyE_uaA3SeNsOwYQI71s/view?usp=sharing)
 * [pipeline useful-tests](https://drive.google.com/file/d/1fK4Q25w_Nz0c3lu5I2mKQZjN3CX204LU/view?usp=sharing)
 * [pipeline build checkbox.io](https://drive.google.com/file/d/1eLS5qk2aWlqgbr45u1FYAlputlsYREL9/view?usp=sharing)
+
+* [pipeline prod up](https://drive.google.com/file/d/1SQeIKj1yTldN1OaOFuixxYm0dthZ2eze/view?usp=sharing)
+
+* [pipeline deploy checkbox.io] (https://drive.google.com/file/d/18e9EPJXs-LryxRLa4RXvd4FVNjtHihli/view?usp=sharing)
+
 
 ## Milestone 2
 
