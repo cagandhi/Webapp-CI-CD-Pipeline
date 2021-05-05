@@ -86,13 +86,10 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 
 ### Screencast-M3
 
-* [pipeline setup](https://drive.google.com/file/d/1uZIexdnAJmoxAB8U7NS6YIvsAOAMrvb3/view?usp=sharing)
+
 * [pipeline build iTrust](https://drive.google.com/file/d/1z1gFPoDicg-CGyE_uaA3SeNsOwYQI71s/view?usp=sharing)
-* [pipeline useful-tests](https://drive.google.com/file/d/1fK4Q25w_Nz0c3lu5I2mKQZjN3CX204LU/view?usp=sharing)
-* [pipeline build checkbox.io](https://drive.google.com/file/d/1eLS5qk2aWlqgbr45u1FYAlputlsYREL9/view?usp=sharing)
-
+* [pipeline canary master master](https://drive.google.com/file/d/1CvQ38SinUzuYykYM93bRkh6zqddaFE9f/view?usp=sharing)
 * [pipeline prod up](https://drive.google.com/file/d/1SQeIKj1yTldN1OaOFuixxYm0dthZ2eze/view?usp=sharing)
-
 * [pipeline deploy checkbox.io](https://drive.google.com/file/d/18e9EPJXs-LryxRLa4RXvd4FVNjtHihli/view?usp=sharing)
 
 
