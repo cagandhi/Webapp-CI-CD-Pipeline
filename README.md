@@ -75,7 +75,6 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 
 * We generated a computing environment with 3 vms: proxy, blue and green for netflix-style canary analysis. The load was generated and initially sent to proxy server by requesting /preview service. Health metrics were collected for 1 min each firstly for blue and then green server. Statistical measure like Mann whitney u test was used for comparison between the health values. Canary score was calculated for passed and failed tests.
 
-* 
 
 ### Issues Faced-M3
 
@@ -94,7 +93,7 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 
 * [pipeline prod up](https://drive.google.com/file/d/1SQeIKj1yTldN1OaOFuixxYm0dthZ2eze/view?usp=sharing)
 
-* [pipeline deploy checkbox.io] (https://drive.google.com/file/d/18e9EPJXs-LryxRLa4RXvd4FVNjtHihli/view?usp=sharing)
+* [pipeline deploy checkbox.io](https://drive.google.com/file/d/18e9EPJXs-LryxRLa4RXvd4FVNjtHihli/view?usp=sharing)
 
 
 ## Milestone 2
