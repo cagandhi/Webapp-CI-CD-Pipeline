@@ -1,6 +1,37 @@
 # DEVOPS-17 Project
 
-## Milestone 3
+## Table of Contents
+
+- [Milestone 3](#milestone-3)
+  * [Project Driver](#project-driver)
+    + [Provision Cloud Instances](#provision-cloud-instances)
+    + [Trigger a build job for iTrust2 and checkbox.io](#trigger-a-build-job-for-itrust2-and-checkboxio)
+    + [Deploy checkbox.io and iTrust2 on DigitalOcean droplets](#deploy-checkboxio-and-itrust2-on-digitalocean-droplets)
+    + [Run canary analysis](#run-canary-analysis)
+  * [Experiences and learnings about system setup-M3](#experiences-and-learnings-about-system-setup-m3)
+  * [Issues Faced-M3](#issues-faced-m3)
+  * [Screencast-M3](#screencast-m3)
+- [Milestone 2](#milestone-2)
+  * [Project Driver](#project-driver-1)
+    + [Configure Jenkins and build environment-M2](#configure-jenkins-and-build-environment-m2)
+    + [Trigger a build job-M2](#trigger-a-build-job-m2)
+    + [Implement a test suite analysis for detecting useful tests-M2](#implement-a-test-suite-analysis-for-detecting-useful-tests-m2)
+  * [Experiences and learnings about system setup-M2](#experiences-and-learnings-about-system-setup-m2)
+  * [Issues Faced-M2](#issues-faced-m2)
+  * [Screencast-M2](#screencast-m2)
+  * [Checkpoint Progress Report-M2](#checkpoint-progress-report-m2)
+- [Milestone 1](#milestone-1)
+  * [Project Setup](#project-setup)
+  * [Project Implementation](#project-implementation)
+    + [Configure Jenkins and build environment](#configure-jenkins-and-build-environment)
+    + [Trigger a build job](#trigger-a-build-job)
+  * [Experiences and learnings about system setup](#experiences-and-learnings-about-system-setup)
+  * [Issues Faced](#issues-faced)
+  * [Screencast](#screencast)
+  * [Checkpoint Progress Report](#checkpoint-progress-report)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 
 ### Project Driver
 
@@ -40,7 +71,6 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 
 ### Experiences and learnings about system setup-M3
 
-
 ### Issues Faced-M3
 
 ### Screencast-M3
@@ -49,7 +79,6 @@ Run canary analysis when blue vm contains the master branch and green vm contain
 * [pipeline build iTrust](https://drive.google.com/file/d/1z1gFPoDicg-CGyE_uaA3SeNsOwYQI71s/view?usp=sharing)
 * [pipeline useful-tests](https://drive.google.com/file/d/1fK4Q25w_Nz0c3lu5I2mKQZjN3CX204LU/view?usp=sharing)
 * [pipeline build checkbox.io](https://drive.google.com/file/d/1eLS5qk2aWlqgbr45u1FYAlputlsYREL9/view?usp=sharing)
-
 
 ## Milestone 2
 
