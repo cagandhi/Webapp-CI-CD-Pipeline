@@ -4,51 +4,46 @@
 
 ### Project Driver
 
-#### Configure Jenkins and build environment-M2
-`pipeline setup --gh-user <username> --gh-pass <password> -u <jenkins_username> -p <jenkins_password>`
+#### Provision Cloud Instances
+`pipeline prod up`
 
-This command performs the following actions:
-* Creates a new VM with static IP `192.168.33.20` and mounts the present working directory (`pwd`) onto `/bakerx` volume. 
-* Configures the CLI arguments of github username and password as environment variables on the VM.
-* Installs ansible server and Jenkins on the VM.
-* Installs MongoDB, creates `MongoDB` user and installs `nodejs` required to run `checkbox.io` app.
-* Installs Maven, MySQL and its dependencies, copy the root credentials file, installs chrome and chromedriver on the VM to run `iTrust2-v8` application.
-* Sets up git credentials in Jenkins Credentials Manager.
-* Creates `checkbox.io` and `iTrust` build jobs on Jenkins.
+This command creates cloud instances on DigitalOcean for `checkbox`, `itrust` and `monitor` VMs. Checkbox contains deployment code for checkbox.io and iTrust2 application. It then outputs `inventory.ini` file required for Ansible, installed on `config-srv`, to connect and configure these instances for deployments.
 
-#### Trigger a build job-M2
+#### Trigger a build job for iTrust2 and checkbox.io
 `pipeline build <iTrust | checkbox.io> -u <jenkins_username> -p <jenkins_password>`
 
 > -u and -p are optional parameters which default to `admin` and `admin`.
 
-This command triggers the already created build job on Jenkins for `checkbox.io` and `iTrust`. The build job yml files can be seen [here](cm/jobs/).
+This command triggers the already created build job on Jenkins for `checkbox.io` and `iTrust`. The build job yml files can be seen [here](cm/jobs/). 
+The `iTrust` build job also generates a WAR file after successful execution of test goal. This `war` file will be used to deploy this Java application 
 
-#### Implement a test suite analysis for detecting useful tests-M2
-`pipeline useful-tests -c 1000 --gh-user <username> --gh-pass <password>`
+#### Deploy checkbox.io and iTrust2 on DigitalOcean droplets
+`pipeline deploy <iTrust | checkbox.io> -i inventory.ini`
 
-> -c is an optional parameter which defaults to 1000.
+> -i is an optional parameter which defaults to `inventory.ini`.
 
-This command implements a testsuite analysis and a fuzzer which introduces changes in the code and the mutation coverage is calculated.
+For `checkbox.io` application, this command sets up the production environment for `checkbox.io` DO droplet. It installs node js, mongo db dependencies and configures nginx for routing. 
 
-### Experiences and learnings about system setup-M2
+For `checkbox.io` application, this command configures Java and Tomcat on the DO droplet for production. 
 
-* Using mutations to randomly modify code helped us learn how to expose potential faults in the codebase. We learned the impact of the quality of mutations applied. If not done intelligently, the code might result in compile failures preventing us from scrutinizing the scripts for faults. Jacoco plugin provides code coverage metrics for Java code via integration with Jacoco. The JaCoCo Maven plug-in provides the JaCoCo runtime agent to your tests and allows basic report creation.
+When testing with local inventory file, please add this block of code for each of the hosts `checkbox` and `itrust`.
+```yml
+[<hostname>:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+```
 
-* Setting up an external application is tough if the documentation is incomplete. Fortunately, for the iTrust application, the instructions to run the application were provided properly however the services or applications that needed to be setup wasn't specified properly. We don't think it is a bad thing but it led to a lot of headache when the packages and services we installed didn't actually integrate well with iTrust and we had to try out different configuration change s make changes repeatedly. 
+#### Run canary analysis
 
-* Static analysis phase is important as it highlights important code smells. The metrics we recorded such as LOC of a function, nesting depth and max chains highlight important and potential issues in the code. A long method would probably be hard to understand for other people or a high max chain count highlights the violation to software engineering principles such as Law of Demeter.
+`pipeline canary master <master | broken>`
 
-### Issues Faced-M2
+Run canary analysis when blue vm contains the master branch and green vm contains the green branch. This command sets up proxy to collect health metrics from blue and green vms and generate load on these VMs for 1 minute each. We then analyse whether there is a significant difference between master and broken branches or master and master branches.
 
-* The tasks were computationally quite expensive. Our machines did not have enough resources to smoothly run all the tasks. Test prioritization for doing 1000 test runs was compute intensive. Running `useful-tests` for a large number of iterations took too long. Due to this, debugging and updating parameters for this task consumed a lot of time.
+### Experiences and learnings about system setup-M3
 
-* While working on the static analysis part, one of the main issues was the proper interpretation of the syntax tree. Although esprima made it a lot easier to visualise the tree, we needed to understand the function which implemented the visitor pattern in order to properly visit all the child nodes and calculate the max depth and max chain. For the max depth, else if statements were previously considered as a child of the preceding if. However, we had to carefully look at the syntax tree and use the alternate property in the nested visitor function to compute the correct answer.
 
-* Configuring the VM for the iTrust application had its own set of challenges. The main issue was timeouts and extremely slow installation of packages. The root cause of the issue was that iTrust is a heavy application and requires ample RAM on the VM for smooth execution. On a 1GB RAM VM, the installation of mysql froze the VM and in turn, one of the team members' laptops as well. Occasionally, we ran into Application not able to start error even when we ran the commands in a 4GB RAM VM. The solution that worked for us was to simply delete the VM and setup everything again. iTrust being a heavy application took a long time to build and that added to the headache. Overall, the build process of ITrust as an application was tricky but we are glad we were able to handle it and get it working.
+### Issues Faced-M3
 
-* Another issue we faced was getting the jacoco and checkstyle plugin to work. At first, we were confused whether we were supposed to change the pom.xml file. On diving deep into the pom.xml file, we saw that jacoco and checkstyle plugins were already installed and configured in the application. We understood that we had to install jenkins plugins that would be able to parse the reports generated. It was tough finding any documentation for jacoco plugin configuration in iTrust-pipeline.yml. A Stack Overflow answer helped us as has helped us countless times before. The configuration of these plugins taught us a lot and also showed us that sometimes, documentation would not be exact and we would need to figure out some moving parts by ourselves.
-
-### Screencast-M2
+### Screencast-M3
 
 * [pipeline setup](https://drive.google.com/file/d/1uZIexdnAJmoxAB8U7NS6YIvsAOAMrvb3/view?usp=sharing)
 * [pipeline build iTrust](https://drive.google.com/file/d/1z1gFPoDicg-CGyE_uaA3SeNsOwYQI71s/view?usp=sharing)
