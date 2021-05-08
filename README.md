@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [Final Demo Video](#final-demo-video)
 - [Milestone 3](#milestone-3)
   * [Project Driver](#project-driver)
     + [Provision Cloud Instances](#provision-cloud-instances)
@@ -30,8 +31,11 @@
   * [Screencast](#screencast)
   * [Checkpoint Progress Report](#checkpoint-progress-report)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+## Final Demo Video
 
+Here's the [final demo video](imgs/Devops-17-Final-Demo-Video.mov). If the above link doesn't work, here's the [Google Drive link](https://drive.google.com/drive/folders/1GPZS7z6lDeoveg8qDaKngfl8iNwEz6da?usp=sharing).
+
+## Milestone 3
 
 ### Project Driver
 
