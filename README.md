@@ -33,7 +33,7 @@
 
 ## Final Demo Video
 
-Here's the [final demo video](imgs/Devops-17-Final-Demo-Video.mov). If the above link doesn't work, here's the [Google Drive link](https://drive.google.com/drive/folders/1GPZS7z6lDeoveg8qDaKngfl8iNwEz6da?usp=sharing).
+Here's the [Google Drive link](https://drive.google.com/drive/folders/1GPZS7z6lDeoveg8qDaKngfl8iNwEz6da?usp=sharing) for final demo video. If this doesn't work or quality does not feel good, here's that [same file](imgs/Devops-17-Final-Demo-Video.mov) in our repo.
 
 ## Milestone 3
 
